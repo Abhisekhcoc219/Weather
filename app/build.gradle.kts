@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.material)
     implementation ("com.intuit.sdp:sdp-android:1.1.0")
     implementation(libs.activity)
+    implementation ("com.airbnb.android:lottie:4.1.0")
     implementation(libs.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
