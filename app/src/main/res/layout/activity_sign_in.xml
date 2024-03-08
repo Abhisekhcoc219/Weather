@@ -86,8 +86,9 @@
                 android:drawableStart="@drawable/email_icon"
                 android:paddingStart="@dimen/_5sdp"
                 android:textSize="@dimen/_17sdp"
+                android:id="@+id/signInEmail"
                 android:drawablePadding="@dimen/_3sdp"
-                android:hint="Enter your email"
+                android:hint="@string/enter_your_email"
                 android:background="@drawable/radius_edittext"
                 />
             <EditText
@@ -99,6 +100,7 @@
                 android:drawableStart="@drawable/password_icon"
                 android:paddingStart="@dimen/_5sdp"
                 android:textSize="@dimen/_17sdp"
+                android:id="@+id/passwordSignIn"
                 android:drawablePadding="@dimen/_3sdp"
                 android:hint="@string/enter_your_password"
                 android:background="@drawable/radius_edittext"
@@ -118,7 +120,7 @@
                 android:layout_marginStart="@dimen/_120sdp"
                 >
                 <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/lottieAnimationView"
+                    android:id="@+id/lottieAnimationView2"
                     android:layout_width="@dimen/_60sdp"
                     android:layout_height="@dimen/_60sdp"
                     app:lottie_autoPlay="true"
@@ -131,11 +133,11 @@
                 android:layout_width="@dimen/_80sdp"
                 android:layout_height="@dimen/_30sdp"
                 android:background="@drawable/radius_btn"
-                android:text="@string/sign_up"
+                android:text="@string/sign_in"
                 android:layout_gravity="center"
                 android:layout_marginStart="@dimen/_20sdp"
                 android:paddingEnd="@dimen/_5sdp"
-                android:id="@+id/SignUpBtn"
+                android:id="@+id/Sign_In_Btn"
                 android:textColor="#fff"
                 android:drawableEnd="@drawable/arrow1"
                 />
@@ -150,7 +152,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Forget Password"
+                android:text="@string/forget_password"
+                android:id="@+id/ForgetPassword"
                 android:textSize="@dimen/_15sdp"
                 />
             <LinearLayout
@@ -171,7 +174,7 @@
                     android:textSize="@dimen/_15sdp"
                     android:text="Sign Up"
                     android:textColor="#0056FF"
-                    android:id="@+id/Sign_Up"
+                    android:id="@+id/Sign_Up_Btn"
                     />
             </LinearLayout>
         </LinearLayout>
