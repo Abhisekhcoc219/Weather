@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,8 @@ public class SignIn extends AppCompatActivity {
     private TextView forget,SignIn;
     private String email,password;
     private FirebaseAuth mAuth;
+
+    private Animation shakeAnim;
     private SignUp s;
 
     @Override
@@ -40,28 +44,30 @@ public class SignIn extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
         InitV();
         lottieAnimationView2.setVisibility(View.GONE);
-        email=signInEmail.getText().toString();
-        password=signInPassword.getText().toString();
-        if(!email.equals("")){
-            if(!password.equals("")){
-                if(EmailVaild.isValidEmail(email)){
-                    lottieAnimationView2.setVisibility(View.VISIBLE);
-                    new Handler().postDelayed(() -> {
-                        signInUser(email,password);
-                        lottieAnimationView2.setVisibility(View.GONE);
-                    },2000);
+        shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
+        signInBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                email=signInEmail.getText().toString();
+                password=signInPassword.getText().toString();
+                if(!email.isEmpty()){
+                    if(!password.isEmpty()){
+                      if(EmailVaild.isValidEmail(email)){
+                          signInUser(email,password);
+                      }
+                      else{
+                          shakeAnim(signInEmail,"email not vaild");
+                      }
+                    }
+                    else{
+                        shakeAnim(signInPassword,"password blank");
+                    }
                 }
                 else{
-                shakeAnimation(signInEmail,"invaild Email");
+                    shakeAnim(signInEmail,"email blank");
                 }
             }
-            else{
-            shakeAnimation(signInPassword,"password blank");
-            }
-        }
-        else{
-         shakeAnimation(signInEmail,"email blank");
-        }
+        });
     }
     private void InitV(){
         signInEmail=findViewById(R.id.signInEmail);
@@ -72,9 +78,9 @@ public class SignIn extends AppCompatActivity {
         SignIn=findViewById(R.id.Sign_Up_Btn);
         mAuth=FirebaseAuth.getInstance();
     }
-    private void shakeAnimation(EditText editText,String Error){
+    private void shakeAnim(EditText editText,String Error){
         s=new SignUp();
-        s.shakeAnimation(editText,Error);
+        s.shakeAnimation(editText,shakeAnim,Error,getApplicationContext());
     }
     private void signInUser(String Email,String Password){
         mAuth.signInWithEmailAndPassword(Email,Password)
@@ -97,7 +103,7 @@ public class SignIn extends AppCompatActivity {
                             }
                         }
                         else{
-                            Toast.makeText(SignIn.this, "something Wrong", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignIn.this, "password invaild", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {

@@ -7,6 +7,7 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -16,8 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
     }
 }
-
 rootProject.name = "weather"
 include(":app")

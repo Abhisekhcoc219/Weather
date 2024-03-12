@@ -2,6 +2,7 @@ package com.example.weather;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -54,12 +55,6 @@ public class SignUp extends AppCompatActivity {
         viewInit();
         mAuth=FirebaseAuth.getInstance();
         gIcon=findViewById(R.id.googleIconBtn);
-        gIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SignUp.this, EmailVerification.class));
-            }
-        });
 
          shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
          signUp.setOnClickListener(v -> {
@@ -82,42 +77,41 @@ public class SignUp extends AppCompatActivity {
                          }
                          else{
 //                             Toast.makeText(this, "Email not vaild", Toast.LENGTH_SHORT).show();
-                             shakeAnimation(Email,"Email not vaild");
+                             shakeAnimation(Email,shakeAnim,"Email not vaild",getApplicationContext());
                          }
                      }
                      else{
                          if(password.equals("")){
-                             shakeAnimation(Password,"Password is blank");
+                             shakeAnimation(Password,shakeAnim,"Password is blank",getApplicationContext());
 
                          }else {
-                             shakeAnimation(Password,"password minimum character 8 to 16");}
+                             shakeAnimation(Password,shakeAnim,"password minimum character 8 to 16",getApplicationContext());}
                      }
                  }
                  else{
-                     shakeAnimation(Email,"Email is blank");
+                     shakeAnimation(Email,shakeAnim,"Email is blank",getApplicationContext());
                  }
              }
              else{
-                 shakeAnimation(Name,"Name is blank");
+                 shakeAnimation(Name,shakeAnim,"Name is blank",getApplicationContext());
              }
          });
         Login.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), SignIn.class));
+            startActivity(new Intent(this, SignIn.class));
         });
     }
-    public void shakeAnimation(EditText getEdit, String Error){
+    public void shakeAnimation(EditText getEdit, Animation Anim , String Error, Context context){
 
-        getEdit.startAnimation(shakeAnim);
-        changeBorderColor(getEdit, getResources().getColor(R.color.red));
+        getEdit.startAnimation(Anim);
+        changeBorderColor(getEdit, context.getResources().getColor(R.color.red));
         getEdit.setError(Error);
-        shakeAnim.setAnimationListener(new Animation.AnimationListener() {
+        Anim.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {}
-
             @Override
             public void onAnimationEnd(Animation animation) {
                 // Remove the red border after animation ends
-                changeBorderColor(getEdit, getResources().getColor(R.color.original_edittext_color));
+                changeBorderColor(getEdit, context.getResources().getColor(R.color.original_edittext_color));
                 // Revert the EditText to its normal state
                 getEdit.clearAnimation();
             }
