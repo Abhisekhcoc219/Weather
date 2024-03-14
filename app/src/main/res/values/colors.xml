@@ -5,5 +5,6 @@
     <color name="red">#FF0000</color>
     <color name="original_edittext_color">#E5EBE9</color>
     <color name="blue">#0059E7</color>
+    <color name="blue1">#0062FF</color>
     <color name="light_blue">#659BFB</color>
 </resources>

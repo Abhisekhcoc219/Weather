@@ -20,31 +20,28 @@ public class HandlerFragment extends AppCompatActivity {
         setContentView(R.layout.activity_handler_fragment);
         bottomNavbar=findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem home=new AHBottomNavigationItem(R.string.home,R.drawable.home,R.color.light_blue);
-        AHBottomNavigationItem search=new AHBottomNavigationItem(R.string.home,R.drawable.home,R.color.light_blue);
-        AHBottomNavigationItem setting=new AHBottomNavigationItem(R.string.home,R.drawable.home,R.color.light_blue);
+        AHBottomNavigationItem search=new AHBottomNavigationItem(R.string.search,R.drawable.search,R.color.light_blue);
+        AHBottomNavigationItem setting=new AHBottomNavigationItem(R.string.setting,R.drawable.settings,R.color.light_blue);
       bottomNavbar.addItem(home);
       bottomNavbar.addItem(search);
       bottomNavbar.addItem(setting);
-      bottomNavbar.setDefaultBackgroundColor(R.color.light_blue);
-      bottomNavbar.setAccentColor(Color.parseColor("#F63D2B"));
-      bottomNavbar.setInactiveColor(Color.parseColor("#747474"));
-      fragementTractions(new HomeFragment());
-      bottomNavbar.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
-          @Override
-          public boolean onTabSelected(int position, boolean wasSelected) {
-              switch (position){
-                  case 0:
-                      fragementTractions(new HomeFragment());
-                      break;
-                  case 1:
-                      fragementTractions(new SearchFragment());
-                      break;
-                  case 2:
-                      fragementTractions(new SettingsFragment());
-                      break;
-              }
-              return true;
+      bottomNavbar.setDefaultBackgroundColor(Color.parseColor("#659BFB"));
+      bottomNavbar.setAccentColor(Color.parseColor("#0059E7"));
+      bottomNavbar.setInactiveColor(Color.parseColor("#0062FF"));
+        fragementTractions(new HomeFragment());
+      bottomNavbar.setOnTabSelectedListener((position, wasSelected) -> {
+          switch (position){
+              case 0:
+                  fragementTractions(new HomeFragment());
+                  break;
+              case 1:
+                  fragementTractions(new SearchFragment());
+                  break;
+              case 2:
+                  fragementTractions(new SettingsFragment());
+                  break;
           }
+          return true;
       });
 
     }
