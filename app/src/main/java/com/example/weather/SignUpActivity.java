@@ -1,13 +1,8 @@
 package com.example.weather;
 
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
+
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,20 +10,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,12 +24,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SignUp extends AppCompatActivity {
-  private LottieAnimationView loading;
-  TextView Login;
-  private EditText Name,Email,Password;
-  private String name,email,password;
-  private AppCompatButton signUp;
+public class SignUpActivity extends AppCompatActivity {
+    private LottieAnimationView loading;
+    TextView Login;
+    private EditText Name,Email,Password;
+    private String name,email,password;
+    private AppCompatButton signUp;
     private static Animation shakeAnim;
 
     private FirebaseAuth mAuth;
@@ -51,55 +38,58 @@ public class SignUp extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+        setContentView(R.layout.activity_signup);
         viewInit();
         mAuth=FirebaseAuth.getInstance();
         gIcon=findViewById(R.id.googleIconBtn);
 
-         shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
-         signUp.setOnClickListener(v -> {
-             name=Name.getText().toString();
-             email=Email.getText().toString();
-             password=Password.getText().toString();
-             if(!name.isEmpty()){
-                 if(!email.isEmpty()){
-                     if(!password.isEmpty() &&(password.length()>7&&password.length()<19)){
-                         if(EmailVaild.isValidEmail(email)){
-                             loading.setVisibility(View.VISIBLE);
-                             new Handler().postDelayed(new Runnable() {
-                                 @Override
-                                 public void run() {
-                                     AuthenticationWithCreaditonal(name,email,password);
-                                     loading.setVisibility(View.GONE);
-                                 }
-                             },2000);
+        shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
+        signUp.setOnClickListener(v -> {
+            name=Name.getText().toString();
+            email=Email.getText().toString();
+            password=Password.getText().toString();
+            if(!name.isEmpty()){
+                if(!email.isEmpty()){
+                    if(!password.isEmpty() &&(password.length()>7&&password.length()<19)){
+                        if(EmailVaild.isValidEmail(email)){
+                            loading.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AuthenticationWithCreaditonal(name,email,password);
+                                    loading.setVisibility(View.GONE);
+                                }
+                            },2000);
 
-                         }
-                         else{
+                        }
+                        else{
+
+
 //                             Toast.makeText(this, "Email not vaild", Toast.LENGTH_SHORT).show();
-                             shakeAnimation(Email,shakeAnim,"Email not vaild",getApplicationContext());
-                         }
-                     }
-                     else{
-                         if(password.equals("")){
-                             shakeAnimation(Password,shakeAnim,"Password is blank",getApplicationContext());
+                            shakeAnimation(Email,shakeAnim,"Email not vaild",SignUpActivity.this);
+                        }
+                    }
+                    else{
+                        if(password.equals("")){
+                            shakeAnimation(Password,shakeAnim,"Password is blank",getApplicationContext());
 
-                         }else {
-                             shakeAnimation(Password,shakeAnim,"password minimum character 8 to 16",getApplicationContext());}
-                     }
-                 }
-                 else{
-                     shakeAnimation(Email,shakeAnim,"Email is blank",getApplicationContext());
-                 }
-             }
-             else{
-                 shakeAnimation(Name,shakeAnim,"Name is blank",getApplicationContext());
-             }
-         });
+                        }else {
+                            shakeAnimation(Password,shakeAnim,"password minimum character 8 to 16",getApplicationContext());}
+                    }
+                }
+                else{
+                    shakeAnimation(Email,shakeAnim,"Email is blank",getApplicationContext());
+                }
+            }
+            else{
+                shakeAnimation(Name,shakeAnim,"Name is blank",getApplicationContext());
+            }
+        });
         Login.setOnClickListener(v -> {
-            startActivity(new Intent(this, SignIn.class));
+            startActivity(new Intent(this, SignInActivity.class));
         });
     }
+
     public void shakeAnimation(EditText getEdit, Animation Anim , String Error, Context context){
 
         getEdit.startAnimation(Anim);
@@ -145,7 +135,7 @@ public class SignUp extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isSuccessful()){
-                                            Intent i=new Intent(getApplicationContext(), EmailVerification.class);
+                                            Intent i=new Intent(getApplicationContext(), EmailVerificationActivity.class);
                                             i.putExtra("name",userName);
                                             i.putExtra("email",userEmail);
                                             startActivity(i);
@@ -155,7 +145,7 @@ public class SignUp extends AppCompatActivity {
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                     Log.e("eeee",e.getLocalizedMessage());
+                                        Log.e("eeee",e.getLocalizedMessage());
                                     }
                                 });
                             }

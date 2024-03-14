@@ -13,21 +13,20 @@
         android:theme="@style/Theme.Weather"
         tools:targetApi="31">
         <activity
-            android:name=".EmailVerification"
+            android:name=".SignUpActivity"
             android:exported="false" />
         <activity
-            android:name=".ForgetPassword"
+            android:name=".EmailVerificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgetPasswordActivity"
             android:exported="false" />
         <activity
             android:name=".HandlerFragment"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SignUp"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".SignIn"
+            android:name=".SignInActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity

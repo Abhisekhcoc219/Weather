@@ -43,7 +43,7 @@ dependencies {
     //noinspection UseTomlInstead
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     //noinspection UseTomlInstead
-    implementation("com.aurelhubert:ahbottomnavigation:2.0.3")
+    implementation("com.aurelhubert:ahbottomnavigation:2.0.4")
     implementation(libs.firebase.storage)
     implementation(libs.firebase.firestore)
     testImplementation(libs.junit)

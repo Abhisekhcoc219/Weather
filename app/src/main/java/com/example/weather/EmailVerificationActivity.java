@@ -7,14 +7,9 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class EmailVerification extends AppCompatActivity {
+public class EmailVerificationActivity extends AppCompatActivity {
     private TextView verifiedMsg;
     private String verify_msg;
     private String emailCred,nameCred;
@@ -57,15 +52,15 @@ public class EmailVerification extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
                     if(mUser.isEmailVerified()){
-                        Toast.makeText(EmailVerification.this, "success", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EmailVerificationActivity.this, "success", Toast.LENGTH_SHORT).show();
                         StoreInDb();
                     }
                     else{
-                        Toast.makeText(EmailVerification.this, "failed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EmailVerificationActivity.this, "failed", Toast.LENGTH_SHORT).show();
                     }
                 }
                 else{
-                    Toast.makeText(EmailVerification.this, "is failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EmailVerificationActivity.this, "is failed", Toast.LENGTH_SHORT).show();
                 }
                 }
             });

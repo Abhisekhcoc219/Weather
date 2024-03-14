@@ -2,7 +2,6 @@ package com.example.weather;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -10,14 +9,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,7 +21,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SignIn extends AppCompatActivity {
+public class SignInActivity extends AppCompatActivity {
     private EditText signInEmail,signInPassword;
     private LottieAnimationView lottieAnimationView2;
     private AppCompatButton signInBtn;
@@ -36,7 +30,9 @@ public class SignIn extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private Animation shakeAnim;
-    private SignUp s;
+
+
+    private SignUpActivity s;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +75,7 @@ public class SignIn extends AppCompatActivity {
         mAuth=FirebaseAuth.getInstance();
     }
     private void shakeAnim(EditText editText,String Error){
-        s=new SignUp();
+        s=new SignUpActivity();
         s.shakeAnimation(editText,shakeAnim,Error,getApplicationContext());
     }
     private void signInUser(String Email,String Password){
@@ -95,15 +91,15 @@ public class SignIn extends AppCompatActivity {
                                     finish();
                                 }
                                 else{
-                                    Toast.makeText(SignIn.this, "email not verified", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(SignInActivity.this, "email not verified", Toast.LENGTH_SHORT).show();
                                 }
                             }
                             else{
-                                Toast.makeText(SignIn.this, "user not exist", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignInActivity.this, "user not exist", Toast.LENGTH_SHORT).show();
                             }
                         }
                         else{
-                            Toast.makeText(SignIn.this, "password invaild", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignInActivity.this, "password invaild", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {

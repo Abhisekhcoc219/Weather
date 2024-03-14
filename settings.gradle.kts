@@ -10,6 +10,9 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven{
+            setUrl("https://maven.google.com")
+        }
     }
 }
 dependencyResolutionManagement {
@@ -17,7 +20,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-
+        maven{
+            setUrl("https://maven.google.com")
+        }
     }
 }
 rootProject.name = "weather"
