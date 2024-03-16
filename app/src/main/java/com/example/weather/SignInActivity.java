@@ -1,5 +1,7 @@
 package com.example.weather;
 
+import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -37,31 +40,41 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_sign_in);
         InitV();
-        lottieAnimationView2.setVisibility(View.GONE);
-        shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
-        signInBtn.setOnClickListener(new View.OnClickListener() {
+        SignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                email=signInEmail.getText().toString();
-                password=signInPassword.getText().toString();
-                if(!email.isEmpty()){
-                    if(!password.isEmpty()){
-                      if(EmailVaild.isValidEmail(email)){
-                          signInUser(email,password);
-                      }
-                      else{
-                          shakeAnim(signInEmail,"email not vaild");
-                      }
-                    }
-                    else{
-                        shakeAnim(signInPassword,"password blank");
-                    }
+                startActivity(new Intent(getApplicationContext(), SignUpActivity.class));
+                finish();
+            }
+        });
+        lottieAnimationView2.setVisibility(View.GONE);
+        shakeAnim= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.shake);
+        forget.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), ForgetPasswordActivity.class));
+        });
+        signInBtn.setOnClickListener(v -> {
+            email=signInEmail.getText().toString();
+            password=signInPassword.getText().toString();
+
+            if(!email.isEmpty()){
+                if(!password.isEmpty()){
+                  if(EmailVaild.isValidEmail(email)){
+                      lottieAnimationView2.setVisibility(View.VISIBLE);
+                      signInUser(email,password);
+                  }
+                  else{
+                      shakeAnim(signInEmail,"email not vaild");
+                  }
                 }
                 else{
-                    shakeAnim(signInEmail,"email blank");
+                    shakeAnim(signInPassword,"password blank");
                 }
+            }
+            else{
+                shakeAnim(signInEmail,"email blank");
             }
         });
     }
@@ -87,18 +100,22 @@ public class SignInActivity extends AppCompatActivity {
                             FirebaseUser user=mAuth.getCurrentUser();
                             if(user!=null){
                                 if(user.isEmailVerified()){
-                                    startActivity(new Intent(getApplicationContext(), HandlerFragment.class));
+                                    startActivity(new Intent(getApplicationContext(), HandlerFragmentActivity.class));
+                                    lottieAnimationView2.setVisibility(View.GONE);
                                     finish();
                                 }
                                 else{
+                                    lottieAnimationView2.setVisibility(View.GONE);
                                     Toast.makeText(SignInActivity.this, "email not verified", Toast.LENGTH_SHORT).show();
                                 }
                             }
                             else{
+                                lottieAnimationView2.setVisibility(View.GONE);
                                 Toast.makeText(SignInActivity.this, "user not exist", Toast.LENGTH_SHORT).show();
                             }
                         }
                         else{
+                            lottieAnimationView2.setVisibility(View.GONE);
                             Toast.makeText(SignInActivity.this, "password invaild", Toast.LENGTH_SHORT).show();
                         }
                     }

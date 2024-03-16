@@ -1,9 +1,12 @@
 package com.example.weather;
 
+import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
+
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -11,12 +14,13 @@ import androidx.fragment.app.FragmentTransaction;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
-public class HandlerFragment extends AppCompatActivity {
+public class HandlerFragmentActivity extends AppCompatActivity {
     private AHBottomNavigation bottomNavbar;
     @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_handler_fragment);
         bottomNavbar=findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem home=new AHBottomNavigationItem(R.string.home,R.drawable.home,R.color.light_blue);

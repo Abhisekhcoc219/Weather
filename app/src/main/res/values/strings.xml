@@ -15,4 +15,6 @@
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="setting">Setting</string>
+    <string name="default_web_client_id">698161858704-sujhdj2kqo0ocbgh1i8unrtahqg6rma7.apps.googleusercontent.com</string>
+    <string name="submit">Submit</string>
 </resources>
