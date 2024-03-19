@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="@dimen/_120sdp"
+ android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/_15sdp"
+    android:layout_marginTop="@dimen/_20sdp"
+    android:background="@drawable/radius_light_blue_for_weekly_forecast"
+    android:gravity="center"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fdjhjdf"
+        android:id="@+id/first_condition"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_15sdp"
+        />
+<ImageView
+    android:layout_width="@dimen/_35sdp"
+    android:layout_height="@dimen/_35sdp"
+    android:src="@drawable/wind"
+    android:id="@+id/image_condition"
+    android:layout_marginTop="@dimen/_10sdp"/>
+        <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fdjhjdf"
+        android:id="@+id/second_condition"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_15sdp"
+        android:layout_marginBottom="@dimen/_10sdp"
+        />
+</LinearLayout>

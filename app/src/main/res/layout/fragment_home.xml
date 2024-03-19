@@ -38,6 +38,7 @@
                  android:layout_height="wrap_content"
                  android:textColor="@color/white"
                  android:textSize="@dimen/_20sdp"
+                 android:id="@+id/UserName"
                  android:text="Abhisek"/>
              <ImageView
                  android:layout_width="@dimen/_25sdp"
@@ -66,15 +67,17 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/_20sdp"
                     android:textColor="@color/white"
+                    android:id="@+id/cityName"
                     android:text="Delhi"
                     />
             </LinearLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="@dimen/_300sdp"
+                android:layout_width="@dimen/_290sdp"
                 android:layout_height="@dimen/_140sdp"
                 android:background="@drawable/radius2"
                 android:layout_marginTop="@dimen/_20sdp"
-                android:layout_marginStart="@dimen/_1sdp"
+                android:layout_marginEnd="@dimen/_25sdp"
+                android:layout_marginStart="@dimen/_25sdp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:id="@+id/HomeCL1"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -88,13 +91,15 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    android:id="@+id/weather_condition_cloud"
                     app:layout_constraintVertical_bias="0.41" />
 
                 <TextView
+                    android:id="@+id/weather_temp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:layout_marginEnd="168dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="160dp"
                     android:text="24c"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_27sdp"
@@ -102,26 +107,28 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_50sdp"
-                    android:layout_marginEnd="@dimen/_80sdp"
+                    android:layout_marginTop="68dp"
+                    android:layout_marginEnd="96dp"
                     android:text="Sunny"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_27sdp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="@+id/weather_temp" />
 
                 <TextView
+                    android:id="@+id/airQuality"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_110sdp"
-                    android:layout_marginEnd="@dimen/_90sdp"
+                    android:layout_marginTop="56dp"
+                    android:layout_marginEnd="64dp"
                     android:text="Air quality"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_13sdp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="@+id/textView" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
@@ -137,28 +144,57 @@
                 app:layout_constraintHorizontal_bias="0.049"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/HomeCL1" />
+
             <LinearLayout
-                android:layout_width="@dimen/_300sdp"
-                android:layout_height="@dimen/_110sdp"
-                app:layout_constraintTop_toBottomOf="@id/today_forecast"
-                android:background="@drawable/radius2"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="@dimen/_5sdp"
                 android:id="@+id/HomeLLayout3"
-                android:orientation="horizontal">
+                android:layout_width="@dimen/_290sdp"
+                android:layout_height="@dimen/_120sdp"
+                android:layout_marginStart="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:layout_marginEnd="@dimen/_20sdp"
+                android:background="@drawable/radius2"
+                android:paddingStart="@dimen/_10sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.444"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/today_forecast">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/today_forecast_recycler"
+                    android:layout_width="@dimen/_260sdp"
+                    android:layout_height="@dimen/_90sdp"
+                    android:layout_marginTop="@dimen/_14sdp"
+                    />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="@dimen/_260sdp"
-                android:layout_height="@dimen/_260sdp"
+                android:layout_width="@dimen/_280sdp"
+                android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/HomeLLayout3"
                 android:background="@drawable/radius2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="@dimen/_15sdp"
                 android:id="@+id/HomeLLayout4"
-                android:orientation="horizontal">
+                android:gravity="center"
+                android:orientation="vertical">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:id="@+id/weekly_forecast_recycler"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:text="5-day weather forecasting"
+                    android:layout_gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_17sdp"
+                    android:paddingBottom="@dimen/_10sdp"
+                    />
             </LinearLayout>
 
             <LinearLayout
@@ -167,71 +203,95 @@
                 app:layout_constraintTop_toBottomOf="@id/HomeLLayout4"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="@dimen/_20sdp"
                 android:id="@+id/HomeLLayout5"
+                android:gravity="center"
                 android:orientation="vertical">
-               <LinearLayout
-                   android:layout_marginTop="@dimen/_30sdp"
+               <androidx.recyclerview.widget.RecyclerView
                    android:layout_width="match_parent"
-                   android:layout_height="wrap_content">
-                   <LinearLayout
-                       android:layout_width="@dimen/_100sdp"
-                       android:layout_height="@dimen/_100sdp"
-                       android:background="@drawable/radius2"
-                       android:layout_marginStart="@dimen/_40sdp"
-                       android:orientation="vertical">
-
-                   </LinearLayout>
-                   <LinearLayout
-                       android:layout_width="@dimen/_100sdp"
-                       android:layout_height="@dimen/_100sdp"
-                       android:background="@drawable/radius2"
-                       android:layout_marginStart="@dimen/_40sdp"
-                       android:orientation="vertical">
-
-                   </LinearLayout>
-               </LinearLayout>
-
-                <LinearLayout
-                    android:layout_marginTop="@dimen/_10sdp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <LinearLayout
-                        android:layout_width="@dimen/_100sdp"
-                        android:layout_height="@dimen/_100sdp"
-                        android:background="@drawable/radius2"
-                        android:layout_marginStart="@dimen/_40sdp"
-                        android:orientation="vertical">
-
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="@dimen/_100sdp"
-                        android:layout_height="@dimen/_100sdp"
-                        android:background="@drawable/radius2"
-                        android:layout_marginStart="@dimen/_40sdp"
-                        android:orientation="vertical">
-
-                    </LinearLayout>
-                </LinearLayout>
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical"
+                   android:id="@+id/weatherCondition"
+                   />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_150sdp"
+                android:layout_height="@dimen/_180sdp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/HomeLLayout5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 >
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_marginTop="@dimen/_20sdp"
-                android:layout_width="@dimen/_290sdp"
+                android:layout_width="@dimen/_280sdp"
                 android:layout_height="@dimen/_100sdp"
                 android:layout_marginEnd="@dimen/_10sdp"
                 android:layout_marginStart="@dimen/_10sdp"
                 android:background="@drawable/radius2">
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/_25sdp"
+                    android:layout_marginTop="@dimen/_15sdp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    >
+                    <ImageView
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/sunset"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sunset"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3:00"
+                        android:id="@+id/whenSunset"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="@dimen/_25sdp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/_25sdp"
+                    android:layout_marginTop="@dimen/_15sdp"
+                    >
+                    <ImageView
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/sunset"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sunset"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3:00"
+                        android:id="@+id/whenSunrise"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
