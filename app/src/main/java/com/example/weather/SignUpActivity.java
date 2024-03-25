@@ -54,6 +54,16 @@ public class SignUpActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser=mAuth.getCurrentUser();
+        if(currentUser!=null){
+            startActivity(new Intent(getApplicationContext(), HandlerFragmentActivity.class));
+            finish();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);

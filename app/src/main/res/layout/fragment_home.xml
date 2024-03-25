@@ -24,9 +24,10 @@
              app:layout_constraintStart_toStartOf="parent"
              app:layout_constraintEnd_toEndOf="parent"
              android:layout_marginTop="@dimen/_10sdp"
+             android:gravity="center"
              android:layout_height="wrap_content">
              <TextView
-                 android:layout_marginStart="@dimen/_20sdp"
+                 android:layout_marginStart="@dimen/_10sdp"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
                  android:textColor="@color/white"
@@ -45,7 +46,9 @@
                  android:layout_height="@dimen/_25sdp"
                  android:src="@drawable/realloction"
                  android:layout_gravity="center"
-                 android:layout_marginStart="@dimen/_150sdp"/>
+                 android:id="@+id/reallocation"
+                 android:layout_marginStart="@dimen/_150sdp"
+                 android:contentDescription="TODO" />
          </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -110,8 +113,8 @@
                     android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="68dp"
-                    android:layout_marginEnd="96dp"
+                    android:layout_marginTop="52dp"
+                    android:layout_marginEnd="92dp"
                     android:text="Sunny"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_27sdp"
@@ -122,8 +125,8 @@
                     android:id="@+id/airQuality"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="56dp"
-                    android:layout_marginEnd="64dp"
+                    android:layout_marginTop="68dp"
+                    android:layout_marginEnd="60dp"
                     android:text="Air quality"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_13sdp"
