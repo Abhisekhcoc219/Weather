@@ -5,13 +5,17 @@ import static android.app.Activity.RESULT_OK;
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -20,11 +24,13 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +44,10 @@ import com.example.weather.weather_forecasting_current_day.current_weather_forec
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -47,12 +56,23 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,7 +87,7 @@ public class HomeFragment extends Fragment {
     private conditionListAdapter conditionListAdapter;
     private ArrayList<conditionDataClass> arrayList_conditionDataClass;
     private ImageView reallocations, weather_icon;
-    private TextView cityName;
+    private TextView cityName,userName,current_temp,time,sunset,sunrise,weatherCondition;
     private int PERMISSION_REQUEST_CODE = 123;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -88,11 +108,10 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 if (GpsUtils.isGpsEnable(requireActivity())) {
                     Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
-//                    getLiveLocation();
+                    getLiveLocation();
                 } else {
                     getPermission();
                 }
-
             }
         });
     }
@@ -104,8 +123,7 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        reallocations = view.findViewById(R.id.reallocation);
-        cityName = view.findViewById(R.id.cityName);
+        HomeViewInit(view);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         if (GpsUtils.isGpsEnable(requireActivity())) {
             Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
@@ -203,8 +221,38 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    @SuppressLint("MissingPermission")
     private void getLiveLocation() {
-
+// Check if the app has permission to access the device's location
+        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            // Request the permissions
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_REQUEST_CODE);
+        } else {
+            // Permissions are already granted, proceed with getting the location
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        getResponseWeatherApi(location.getLatitude(),location.getLongitude(),"metric",RetrofitForCurrentWeather.getApiKey());
+                    } else {
+                        // Location is null, handle the case if location is unavailable
+                        Toast.makeText(requireActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addOnFailureListener(requireActivity(), new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Failed to obtain location, handle the failure
+                    Toast.makeText(requireActivity(), "Failed to obtain location", Toast.LENGTH_SHORT).show();
+                    Log.e("Essss", e.getLocalizedMessage());
+                }
+            });
+        }
     }
     private void getResponseWeatherApi(double lat,double lon,String units,String apiKey){
         Toast.makeText(requireActivity(), "entry", Toast.LENGTH_SHORT).show();
@@ -212,8 +260,9 @@ public class HomeFragment extends Fragment {
         RetrofitForCurrentWeather.getInstance().weatherApi.getWeatherData(lat,lon,units,apiKey).enqueue(new Callback<current_weather_forecast>() {
             @Override
             public void onResponse(Call<current_weather_forecast> call, Response<current_weather_forecast> response) {
-                Log.e("ssssssss",response.body().toString());
             current_weather_forecast weather=response.body();
+                Log.e("ssssssss",weather.getName());
+                dataSetOnViews(weather);
             }
 
             @Override
@@ -231,8 +280,118 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "gps was on", Toast.LENGTH_SHORT).show();
             }
             else if(resultCode==RESULT_CANCELED){
-
+                Toast.makeText(requireActivity(), "gps was not on", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+    private void HomeViewInit(View view){
+        reallocations = view.findViewById(R.id.reallocation);
+        cityName = view.findViewById(R.id.cityName);
+        userName=view.findViewById(R.id.UserName);
+        weather_icon=view.findViewById(R.id.weather_condition_cloud);
+        current_temp=view.findViewById(R.id.current_Temp);
+        time=view.findViewById(R.id.Time);
+        sunset=view.findViewById(R.id.whenSunset);
+        sunrise=view.findViewById(R.id.whenSunrise);
+        weatherCondition=view.findViewById(R.id.weather_description);
+    }
+    private void dataSetOnViews(current_weather_forecast weatherData){
+        FirebaseUser u= FirebaseAuth.getInstance().getCurrentUser();
+        if(u!=null){
+        userName.setText(u.getDisplayName());
+        }
+        cityName.setText(weatherData.getName());
+        current_temp.setText(String.valueOf(weatherData.getMain().getTemp()));
+        time.setText(getTimes(weatherData.getTimezone()));
+        sunset.setText(getSunSetAndSunRise(weatherData.getSys().getSunset()));
+        sunrise.setText(getSunSetAndSunRise(weatherData.getSys().getSunrise()));
+        weatherCondition.setText(weatherData.getArrayListWeather().get(0).getDescription());
+//        setWeatherIcon(weatherData.getArrayListWeather().get(0).getIcon());
+        SetIcons(weatherData.getArrayListWeather().get(0).getIcon());
+    }
+    private String getTimes(long timestamp){
+        long offsetInMilliseconds = timestamp * 1000L;
+        // Create a TimeZone object with the offset
+        TimeZone timezone = TimeZone.getTimeZone(new Long(offsetInMilliseconds).toString());
+        // Create a Calendar object with the current time in the specified timezone
+        Calendar calendar = Calendar.getInstance(timezone);
+        // Extract hour and minutes
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
+        String amPm=(hour<12)?"am" : "pm";
+        return hour+" : "+minutes+" "+amPm;
+    }
+    private String getSunSetAndSunRise(long sunriseTimestamp){
+        long sunriseTimeInMillis = sunriseTimestamp * 1000L;
+
+        // Create a Date object from the timestamp
+        Date sunriseDate = new Date(sunriseTimeInMillis);
+
+        // Format the date in the desired format (adjust format as needed)
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm "); // Adjust format for 12-hour clock (a for AM/PM), exclude seconds
+        String formattedSunriseTime = formatter.format(sunriseDate);
+        return formattedSunriseTime;
+    }
+//    private void setWeatherIcon(String iconCode) {
+//        String iconName = iconCode + "@2x.png";
+//        String iconUrl = "https://openweathermap.org/img/wn/" + iconName;
+//
+//        // Download the icon using an AsyncTask or a background thread
+//        new DownloadImageTask().execute(iconUrl);
+//    }
+
+
+
+//    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+//
+//        @Override
+//        protected Bitmap doInBackground(String... urls) {
+//            String url = urls[0];
+//            Bitmap bitmap = null;
+//            try {
+//                URL imageUrl = new URL(url);
+//                HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+//                connection.setDoInput(true);
+//                connection.connect();
+//                InputStream input = connection.getInputStream();
+//                bitmap = BitmapFactory.decodeStream(input);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            return bitmap;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Bitmap result) {
+//            if (result != null) {
+//                weather_icon.setImageBitmap(result);
+//            } else {
+//                // Handle the case where the image download failed
+//            }
+//        }
+//    }
+    private void SetIcons(String icon){
+        Map<String,Integer>iconMap=new HashMap<>();
+        iconMap.put("01d",R.drawable.sun_weather);
+        iconMap.put("01n",R.drawable.fullmoon_weather);
+        iconMap.put("02d",R.drawable.cloudy_weather);
+        iconMap.put("02n",R.drawable.moon_cloud_weather);
+        iconMap.put("03d",R.drawable.cloudd);
+        iconMap.put("03n",R.drawable.cloudn);
+        iconMap.put("04d",R.drawable.scattered_clouds);
+        iconMap.put("04n",R.drawable.scattered_clouds);
+        iconMap.put("09d",R.drawable.sun_shower_weather);
+        iconMap.put("09n",R.drawable.rain_icon);
+        iconMap.put("10d",R.drawable.rain);
+        iconMap.put("11d",R.drawable.thunderstorm);
+        iconMap.put("11n",R.drawable.thunderstorm);
+        iconMap.put("13d",R.drawable.snowflake_weather);
+        iconMap.put("13n",R.drawable.snowflake_weather);
+        iconMap.put("50d",R.drawable.mist_weather);
+        iconMap.put("50n",R.drawable.mist_weather);
+        Integer iconResourceId = iconMap.get(icon);
+        if(iconResourceId!=null){
+            weather_icon.setImageResource(iconResourceId);
         }
     }
 }
