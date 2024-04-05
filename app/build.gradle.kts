@@ -45,6 +45,9 @@ dependencies {
     //noinspection UseTomlInstead
     implementation("com.aurelhubert:ahbottomnavigation:2.0.4")
     implementation(libs.firebase.storage)
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
+
     implementation(libs.firebase.firestore)
     implementation(libs.play.services.location)
     testImplementation(libs.junit)

@@ -25,28 +25,34 @@
              app:layout_constraintEnd_toEndOf="parent"
              android:layout_marginTop="@dimen/_10sdp"
              android:layout_height="wrap_content">
+             <LinearLayout
+                 android:layout_width="@dimen/_220sdp"
+                 android:layout_height="@dimen/_25sdp">
              <TextView
                  android:layout_marginStart="@dimen/_15sdp"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
                  android:textColor="@color/white"
+                 android:fontFamily="@font/abeezee"
                  android:textSize="@dimen/_15sdp"
                  android:text="Hi,"/>
              <TextView
                  android:layout_marginStart="@dimen/_5sdp"
                  android:layout_width="wrap_content"
+                 android:fontFamily="@font/abeezee"
                  android:layout_height="wrap_content"
                  android:textColor="@color/white"
                  android:textSize="@dimen/_15sdp"
                  android:id="@+id/UserName"
                  android:text=""/>
+             </LinearLayout>
              <ImageView
                  android:layout_width="@dimen/_25sdp"
                  android:layout_height="@dimen/_25sdp"
                  android:src="@drawable/realloction"
                  android:layout_gravity="center"
                  android:id="@+id/reallocation"
-                 android:layout_marginStart="@dimen/_140sdp"
+                 android:layout_marginStart="@dimen/_40sdp"
                  android:contentDescription="TODO" />
          </LinearLayout>
             <LinearLayout
@@ -65,6 +71,7 @@
                     android:src="@drawable/location_icon"
                     android:id="@+id/location_icons"/>
                 <TextView
+                    android:fontFamily="@font/abeezee"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/_20sdp"
@@ -84,54 +91,67 @@
                 android:id="@+id/HomeCL1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/HomeLLayout2">
-
-                <ImageView
-                    android:layout_width="@dimen/_90sdp"
-                    android:layout_height="@dimen/_90sdp"
-                    android:layout_marginStart="@dimen/_6sdp"
-                    android:src="@drawable/weather_icons"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                <LinearLayout
+                    android:id="@+id/ImageParent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:id="@+id/weather_condition_cloud"
-                    app:layout_constraintVertical_bias="0.41" />
-
-                <TextView
-                    android:id="@+id/current_Temp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="144dp"
-                    android:text="24c"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_27sdp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:layout_width="@dimen/_90sdp"
+                        android:layout_height="@dimen/_90sdp"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:src="@drawable/weather_moons"
+                        android:id="@+id/weather_condition_cloud"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_marginStart="@dimen/_6sdp"
+                    app:layout_constraintStart_toEndOf="@id/ImageParent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="@dimen/_180sdp"
+                    android:layout_height="@dimen/_130sdp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:orientation="vertical"
+                    >
+                    <TextView
+                        android:id="@+id/current_Temp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:layout_marginTop="@dimen/_18sdp"
+                        android:fontFamily="@font/abeezee"
+                        android:text="24c"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_27sdp" />
+                    <TextView
+                        android:fontFamily="@font/abeezee"
+                        android:id="@+id/weather_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_15sdp"
+                        android:layout_marginStart="@dimen/_30sdp"
+                        android:text="Sunny"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_17sdp"/>
 
-                <TextView
-                    android:id="@+id/weather_description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="60dp"
-                    android:layout_marginEnd="100dp"
-                    android:text="Sunny"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_15sdp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/current_Temp" />
-
-                <TextView
-                    android:id="@+id/Time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="52dp"
-                    android:layout_marginEnd="100dp"
-                    android:text=""
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_13sdp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/weather_description" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/Time"
+                        android:fontFamily="@font/abeezee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="klsdkdsljdksl"
+                        android:layout_marginTop="@dimen/_20sdp"
+                        android:layout_marginStart="@dimen/_17sdp"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_14sdp"
+                        />
+                </LinearLayout>
+               </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -191,7 +211,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_20sdp"
-                    android:text="5-day weather forecasting"
+                    android:text="7-day weather forecasting"
                     android:layout_gravity="center"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_17sdp"

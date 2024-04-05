@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 public class todayForecastListCustomAdapter extends RecyclerView.Adapter<todayForecastListCustomAdapter.ViewHolder> {
     ArrayList<todayForecastDataClass>todayForecastListCustomAdapterArrayList;
+    public static final String Celius="°";
     todayForecastListCustomAdapter(ArrayList<todayForecastDataClass>todayForecastListCustomAdapterArrayLists){
         this.todayForecastListCustomAdapterArrayList=todayForecastListCustomAdapterArrayLists;
     }
@@ -25,9 +26,10 @@ public class todayForecastListCustomAdapter extends RecyclerView.Adapter<todayFo
 
     @Override
     public void onBindViewHolder(@NonNull todayForecastListCustomAdapter.ViewHolder holder, int position) {
-    holder.firstText.setText(todayForecastListCustomAdapterArrayList.get(position).getFirstText());
-    holder.secondText.setText(todayForecastListCustomAdapterArrayList.get(position).getSecondText());
-    holder.cloudImg.setImageResource(todayForecastListCustomAdapterArrayList.get(position).getCloudImage());
+        String temp=String.valueOf(Math.round(todayForecastListCustomAdapterArrayList.get(position).getTemperature()))+Celius;
+    holder.firstText.setText(todayForecastListCustomAdapterArrayList.get(position).getTime());
+    holder.secondText.setText(temp);
+    holder.cloudImg.setImageResource(todayForecastListCustomAdapterArrayList.get(position).getCloudIcon());
     }
 
     @Override

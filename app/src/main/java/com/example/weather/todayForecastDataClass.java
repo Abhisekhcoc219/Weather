@@ -1,38 +1,24 @@
 package com.example.weather;
 
 public class todayForecastDataClass {
-
-    private String firstText,secondText;
-    private int cloudImage;
-    todayForecastDataClass(String first_text,int cloud_image,String second_text){
-        this.firstText=first_text;
-        this.cloudImage=cloud_image;
-        this.secondText=second_text;
-    }
-todayForecastDataClass(){
-
-}
-    public int getCloudImage() {
-        return cloudImage;
+    private String time;
+    private double temperature;
+    private int cloudIcon;
+    todayForecastDataClass(String time,double temp,int icon){
+        this.time=time;
+        this.temperature=temp;
+        this.cloudIcon=icon;
     }
 
-    public String getFirstText() {
-        return firstText;
+    public String getTime() {
+        return time;
     }
 
-    public String getSecondText() {
-        return secondText;
+    public double getTemperature() {
+        return temperature;
     }
 
-    public void setCloudImage(int cloudImage) {
-        this.cloudImage = cloudImage;
-    }
-
-    public void setFirstText(String firstText) {
-        this.firstText = firstText;
-    }
-
-    public void setSecondText(String secondText) {
-        this.secondText = secondText;
+    public int getCloudIcon() {
+        return cloudIcon;
     }
 }

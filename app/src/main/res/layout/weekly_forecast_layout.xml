@@ -35,7 +35,7 @@
     <ImageView
         android:layout_marginStart="@dimen/_70sdp"
         android:layout_width="@dimen/_30sdp"
-        android:src="@drawable/thunderstorm"
+        android:src="@drawable/thunderstorm_weather"
         android:id="@+id/cloudImg"
         android:layout_height="@dimen/_22sdp"
         app:layout_constraintTop_toTopOf="parent"

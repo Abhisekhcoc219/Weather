@@ -6,16 +6,14 @@ import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -30,7 +28,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,15 +36,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.weather.weather_forecasting_current_day.RetrofitForCurrentWeather;
-import com.example.weather.weather_forecasting_current_day.current_weather_forecast;
+import com.example.weather.data.model.ApiPackage.RetrofitClient;
+import com.example.weather.data.model.currentForecastModelClass.CurrentWeatherForecastResponse;
+import com.example.weather.data.model.currentWeekForecastModelClass.CurrentWeekWeatherResponse;
+import com.example.weather.data.model.mobilePermissions.GpsUtils;
+import com.example.weather.data.model.mobilePermissions.InternetUtils;
+import com.example.weather.data.model.mobilePermissions.WifiUtils;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -59,20 +57,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -80,13 +76,15 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
     private RecyclerView recyclerViewTodayForecast, recyclerViewWeeklyForecast, recyclerViewWeatherCondition;
-    private ArrayList<todayForecastDataClass> arrayList_today_forecast;
-    private ArrayList<weeklyForecastDataClass> arrayList_weekly_forecast;
-    private weeklyForecastListAdapter weeklyForecastListAdapters;
+    private ArrayList<todayForecastDataClass> arrayListForTodayForcast;
+    private ArrayList<weeklyForecastDataClass>arrayListWeeklyForecast;
+    private weeklyForecastListCustomAdapter weeklyForecastListCustomAdapters;
     private todayForecastListCustomAdapter todayForecastListCustomAdapter;
     private conditionListAdapter conditionListAdapter;
     private ArrayList<conditionDataClass> arrayList_conditionDataClass;
     private ImageView reallocations, weather_icon;
+    private CurrentWeatherForecastResponse currentWeatherForecastResponse;
+    private static final String Celius="°";
     private TextView cityName,userName,current_temp,time,sunset,sunrise,weatherCondition;
     private int PERMISSION_REQUEST_CODE = 123;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -99,23 +97,6 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
         // Required empty public constructor
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        reallocations.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (GpsUtils.isGpsEnable(requireActivity())) {
-                    Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
-                    getLiveLocation();
-                } else {
-                    getPermission();
-                }
-            }
-        });
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -125,68 +106,62 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         HomeViewInit(view);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        if (GpsUtils.isGpsEnable(requireActivity())) {
-            Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
-            getLiveLocation();
-        } else {
-            Toast.makeText(requireActivity(), "gps is not on", Toast.LENGTH_SHORT).show();
-            getPermission();
+        if(InternetUtils.isMobileDataAvailable(requireActivity()))
+        {
+            if (GpsUtils.isGpsEnable(requireActivity())) {
+                Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
+                getLiveLocation(view);
+            } else {
+                Toast.makeText(requireActivity(), "gps is not on", Toast.LENGTH_SHORT).show();
+                getPermission(view);
+            }
         }
-        recyclerInit(view);
+        else{
+            Toast.makeText(requireActivity(), "Please enable data", Toast.LENGTH_SHORT).show();
+            if(WifiUtils.isWifiEnable(requireActivity())){
+                if (GpsUtils.isGpsEnable(requireActivity())) {
+                    Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
+                    getLiveLocation(view);
+                } else {
+                    Toast.makeText(requireActivity(), "gps is not on", Toast.LENGTH_SHORT).show();
+                    getPermission(view);
+                }
+            }
+            else{
+                Toast.makeText(requireActivity(), "wifi is not connect to devices ", Toast.LENGTH_SHORT).show();
+            }
+        }
         return view;
     }
-
-    private void recyclerInit(View view) {
-        todayForecastViewInitAndSet(view);//this one today forecast view
-        weeklyForecastViewInitAndSet(view);//this one weekly forecast view
-        weatherConditionViewInit(view);
+    private void HomeViewInit(View view){
+        reallocations = view.findViewById(R.id.reallocation);
+        cityName = view.findViewById(R.id.cityName);
+        userName=view.findViewById(R.id.UserName);
+        weather_icon=view.findViewById(R.id.weather_condition_cloud);
+        current_temp=view.findViewById(R.id.current_Temp);
+        time=view.findViewById(R.id.Time);
+        sunset=view.findViewById(R.id.whenSunset);
+        sunrise=view.findViewById(R.id.whenSunrise);
+        weatherCondition=view.findViewById(R.id.weather_description);
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        boolean isTrue=GpsUtils.isGpsEnable(requireActivity());
+        reallocations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isTrue) {
+                    Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
+                    getLiveLocation(v);
+                } else {
+                    getPermission(v);
+                }
+            }
+        });
     }
 
-    private void weatherConditionViewInit(View view) {
-        recyclerViewWeatherCondition = view.findViewById(R.id.weatherCondition);
-        arrayList_conditionDataClass = new ArrayList<>();
-        recyclerViewWeatherCondition.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        arrayList_conditionDataClass.add(new conditionDataClass("E wind", R.drawable.wind, "6 mi/h"));
-        arrayList_conditionDataClass.add(new conditionDataClass("Humidity", R.drawable.water_drop, "51%"));
-        arrayList_conditionDataClass.add(new conditionDataClass("UV", R.drawable.suns, "very weak"));
-        arrayList_conditionDataClass.add(new conditionDataClass("Visibility", R.drawable.eye, "very weak"));
-        conditionListAdapter = new conditionListAdapter(arrayList_conditionDataClass);
-        recyclerViewWeatherCondition.setAdapter(conditionListAdapter);
-    }
-
-    private void todayForecastViewInitAndSet(View view) {
-        arrayList_today_forecast = new ArrayList<>();
-        recyclerViewTodayForecast = view.findViewById(R.id.today_forecast_recycler);
-        recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        arrayList_today_forecast.add(new todayForecastDataClass("Now", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("10:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("11:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("12:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("13:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("14:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("15:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("16:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("17:00", R.drawable.half_moon, "20c"));
-        arrayList_today_forecast.add(new todayForecastDataClass("18:00", R.drawable.half_moon, "20c"));
-        todayForecastListCustomAdapter = new todayForecastListCustomAdapter(arrayList_today_forecast);
-        recyclerViewTodayForecast.setAdapter(todayForecastListCustomAdapter);
-    }
-
-    private void weeklyForecastViewInitAndSet(View view) {
-        arrayList_weekly_forecast = new ArrayList<>();
-        recyclerViewWeeklyForecast = view.findViewById(R.id.weekly_forecast_recycler);
-        recyclerViewWeeklyForecast.setLayoutManager(new LinearLayoutManager(getContext()));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("today", "21c", R.drawable.sun));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("tomorrow", "21c", R.drawable.sun));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("Mon", "21c", R.drawable.sun));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("Tue", "21c", R.drawable.sun));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("Wed", "21c", R.drawable.sun));
-        arrayList_weekly_forecast.add(new weeklyForecastDataClass("Thu", "21c", R.drawable.sun));
-        weeklyForecastListAdapters = new weeklyForecastListAdapter(arrayList_weekly_forecast);
-        recyclerViewWeeklyForecast.setAdapter(weeklyForecastListAdapters);
-    }
-
-    private void getPermission() {
+    private void getPermission(View v) {
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10000)
@@ -203,13 +178,14 @@ public class HomeFragment extends Fragment {
                 try {
                     LocationSettingsResponse response = task.getResult(ApiException.class);
                     Toast.makeText(requireActivity(), "Gps on", Toast.LENGTH_SHORT).show();
-                    getLiveLocation();
+                    getLiveLocation(v);
                 } catch (ApiException e) {
                     switch (e.getStatusCode()) {
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                             try {
                                 ResolvableApiException resolvableApiException = (ResolvableApiException) e;
                                 resolvableApiException.startResolutionForResult(requireActivity(), PERMISSION_REQUEST_CODE);
+                                getLiveLocation(v);
                             } catch (IntentSender.SendIntentException ex) {
                                 break;
                             }
@@ -221,8 +197,10 @@ public class HomeFragment extends Fragment {
         });
     }
 
+
+
     @SuppressLint("MissingPermission")
-    private void getLiveLocation() {
+    private void getLiveLocation(View v) {
 // Check if the app has permission to access the device's location
         if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED &&
@@ -238,7 +216,8 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        getResponseWeatherApi(location.getLatitude(),location.getLongitude(),"metric",RetrofitForCurrentWeather.getApiKey());
+                        getResponseWeatherApi(location.getLatitude(),location.getLongitude(),"metric",RetrofitClient.getOpenWeatherApiKey(),v);
+                        getResponseFor6Days(location.getLatitude(),location.getLongitude(),"temperature_2m","temperature_2m,weathercode",v);
                     } else {
                         // Location is null, handle the case if location is unavailable
                         Toast.makeText(requireActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
@@ -254,23 +233,127 @@ public class HomeFragment extends Fragment {
             });
         }
     }
-    private void getResponseWeatherApi(double lat,double lon,String units,String apiKey){
+
+
+
+    private void getResponseWeatherApi(double lat,double lon,String units,String apiKey,View v){
         Toast.makeText(requireActivity(), "entry", Toast.LENGTH_SHORT).show();
 
-        RetrofitForCurrentWeather.getInstance().weatherApi.getWeatherData(lat,lon,units,apiKey).enqueue(new Callback<current_weather_forecast>() {
+
+        RetrofitClient.getOpenWeatherApi().getCurrentWeatherForecast(String.valueOf(lat),String.valueOf(lon),units,apiKey).enqueue(new Callback<CurrentWeatherForecastResponse>() {
             @Override
-            public void onResponse(Call<current_weather_forecast> call, Response<current_weather_forecast> response) {
-            current_weather_forecast weather=response.body();
+            public void onResponse(Call<CurrentWeatherForecastResponse> call, Response<CurrentWeatherForecastResponse> response) {
+                CurrentWeatherForecastResponse weather=response.body();
+                if(currentWeatherForecastResponse==null){
+                    currentWeatherForecastResponse=response.body();
+                }
                 Log.e("ssssssss",weather.getName());
                 dataSetOnViews(weather);
+                weatherConditionViewInit(v,weather);
             }
 
             @Override
-            public void onFailure(Call<current_weather_forecast> call, Throwable throwable) {
-                Log.e("ffffffff",throwable.getLocalizedMessage());
+            public void onFailure(Call<CurrentWeatherForecastResponse> call, Throwable throwable) {
+//                Log.e("ffffffff",throwable.getLocalizedMessage());
             }
         });
     }
+
+    private void dataSetOnViews(CurrentWeatherForecastResponse currentWeather){
+        if(currentWeather!=null){
+            FirebaseUser u= FirebaseAuth.getInstance().getCurrentUser();
+            String feels_like="feels like:- "+Math.round(currentWeather.getMain().getFeelsLike())+Celius;
+            String temp=String.valueOf(Math.round(currentWeather.getMain().getTemp()))+Celius;
+            if(u!=null){
+                userName.setText(u.getDisplayName());
+            }
+            cityName.setText(currentWeather.getName());
+            current_temp.setText(temp);
+            time.setText(feels_like);
+            sunset.setText(getSunSetAndSunRise(currentWeather.getSys().getSunset()));
+            sunrise.setText(getSunSetAndSunRise(currentWeather.getSys().getSunrise()));
+            weatherCondition.setText(currentWeather.getArrayListWeather().get(0).getDescription());
+            weather_icon.setImageResource(SetIcons(currentWeather.getArrayListWeather().get(0).getIcon()));
+        }
+    }
+    private void weatherConditionViewInit(View view,CurrentWeatherForecastResponse cw) {
+        if(cw!=null) {
+            String ewind=String.valueOf(Math.round(cw.getWind().getSpeed()));
+            double gettingActualVisibility=cw.getVisibility()*0.0062137;
+            String humidity=String.valueOf(cw.getMain().getHumidity())+"%";
+            String visiblity=String.valueOf(Math.round(gettingActualVisibility));
+            String airPressure=String.valueOf(cw.getMain().getPressure())+" mmHg";
+            recyclerViewWeatherCondition = view.findViewById(R.id.weatherCondition);
+            arrayList_conditionDataClass = new ArrayList<>();
+            recyclerViewWeatherCondition.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            arrayList_conditionDataClass.add(new conditionDataClass("E wind", R.drawable.wind,ewind));
+            arrayList_conditionDataClass.add(new conditionDataClass("Humidity", R.drawable.water_drop,humidity));
+            arrayList_conditionDataClass.add(new conditionDataClass("air pressure", R.drawable.air_pressure, airPressure));
+            arrayList_conditionDataClass.add(new conditionDataClass("Visibility", R.drawable.eye, visiblity));
+            conditionListAdapter = new conditionListAdapter(arrayList_conditionDataClass);
+            recyclerViewWeatherCondition.setAdapter(conditionListAdapter);
+        }
+    }
+
+
+
+    private void getResponseFor6Days(double lat,double lon,String current,String hourly,View v){
+        RetrofitClient.getOpenMeteoApi().getCurrentWeekWeather(String.valueOf(lat),String.valueOf(lon),current,hourly).enqueue(new Callback<CurrentWeekWeatherResponse>() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onResponse(Call<CurrentWeekWeatherResponse> call, Response<CurrentWeekWeatherResponse> response) {
+                CurrentWeekWeatherResponse weekWeatherResponse=response.body();
+//              Log.e("TAGS",""+response.body().getHourly().getTemperature2m());
+                todayForecastViewInitAndSet(v,weekWeatherResponse);//this one today forecast view
+                weeklyForecastViewInitAndSet(v,weekWeatherResponse);
+            }
+
+            @Override
+            public void onFailure(Call<CurrentWeekWeatherResponse> call, Throwable throwable) {
+                Log.e("TAGF",throwable.getLocalizedMessage());
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void todayForecastViewInitAndSet(View view, CurrentWeekWeatherResponse weekWeatherResponse) {
+        List<String>time24Hour=get24HourTimeForecast(weekWeatherResponse.getHourly().getTime());
+        List<Double>temp24Hour=get24HourTempForecast(weekWeatherResponse.getHourly().getTemperature2m());
+        List<Integer>weatherCode24Hour=get24WeatherCode(weekWeatherResponse.getHourly().getWeatherCode());
+        arrayListForTodayForcast = new ArrayList<>();
+        recyclerViewTodayForecast = view.findViewById(R.id.today_forecast_recycler);
+        recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        for(int i=0;i<time24Hour.size();i++){
+            if(i==0){
+                if(currentWeatherForecastResponse!=null){
+             arrayListForTodayForcast.add(i,new todayForecastDataClass(time24Hour.get(i),currentWeatherForecastResponse.getMain().getTemp(),SetIcons(currentWeatherForecastResponse.getArrayListWeather().get(0).getIcon()))); }
+            }
+            else {
+                arrayListForTodayForcast.add(i, new todayForecastDataClass(time24Hour.get(i), temp24Hour.get(i), getWeatherIcon(weatherCode24Hour.get(i))));
+            }
+        }
+        todayForecastListCustomAdapter = new todayForecastListCustomAdapter(arrayListForTodayForcast);
+        recyclerViewTodayForecast.setAdapter(todayForecastListCustomAdapter);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void weeklyForecastViewInitAndSet(View view, CurrentWeekWeatherResponse weekWeatherResponse) {
+        arrayListWeeklyForecast = new ArrayList<>();
+        recyclerViewWeeklyForecast = view.findViewById(R.id.weekly_forecast_recycler);
+        recyclerViewWeeklyForecast.setLayoutManager(new LinearLayoutManager(getContext()));
+        List<String>time=get6DayTimeForecast(weekWeatherResponse.getHourly().getTime());
+        List<Double>temp=get6DayTempForecast(weekWeatherResponse.getHourly().getTemperature2m());
+        List<Integer>weatherCode=get6DayWeatherCode(weekWeatherResponse.getHourly().getWeatherCode());
+        for(int i=0;i<time.size();i++){
+            arrayListWeeklyForecast.add(i,new weeklyForecastDataClass(time.get(i),temp.get(i),getWeatherIcon(weatherCode.get(i))));
+        }
+//        Log.e("TAGF",weekWeatherResponse.getHourly().getTime().subList())
+        weeklyForecastListCustomAdapters=new weeklyForecastListCustomAdapter(arrayListWeeklyForecast);
+        recyclerViewWeeklyForecast.setAdapter(weeklyForecastListCustomAdapters);
+    }
+
+
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -284,114 +367,201 @@ public class HomeFragment extends Fragment {
             }
         }
     }
-    private void HomeViewInit(View view){
-        reallocations = view.findViewById(R.id.reallocation);
-        cityName = view.findViewById(R.id.cityName);
-        userName=view.findViewById(R.id.UserName);
-        weather_icon=view.findViewById(R.id.weather_condition_cloud);
-        current_temp=view.findViewById(R.id.current_Temp);
-        time=view.findViewById(R.id.Time);
-        sunset=view.findViewById(R.id.whenSunset);
-        sunrise=view.findViewById(R.id.whenSunrise);
-        weatherCondition=view.findViewById(R.id.weather_description);
-    }
-    private void dataSetOnViews(current_weather_forecast weatherData){
-        FirebaseUser u= FirebaseAuth.getInstance().getCurrentUser();
-        if(u!=null){
-        userName.setText(u.getDisplayName());
-        }
-        cityName.setText(weatherData.getName());
-        current_temp.setText(String.valueOf(weatherData.getMain().getTemp()));
-        time.setText(getTimes(weatherData.getTimezone()));
-        sunset.setText(getSunSetAndSunRise(weatherData.getSys().getSunset()));
-        sunrise.setText(getSunSetAndSunRise(weatherData.getSys().getSunrise()));
-        weatherCondition.setText(weatherData.getArrayListWeather().get(0).getDescription());
-//        setWeatherIcon(weatherData.getArrayListWeather().get(0).getIcon());
-        SetIcons(weatherData.getArrayListWeather().get(0).getIcon());
-    }
     private String getTimes(long timestamp){
         long offsetInMilliseconds = timestamp * 1000L;
-        // Create a TimeZone object with the offset
-        TimeZone timezone = TimeZone.getTimeZone(new Long(offsetInMilliseconds).toString());
-        // Create a Calendar object with the current time in the specified timezone
-        Calendar calendar = Calendar.getInstance(timezone);
-        // Extract hour and minutes
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minutes = calendar.get(Calendar.MINUTE);
-        String amPm=(hour<12)?"am" : "pm";
-        return hour+" : "+minutes+" "+amPm;
+        Date sunriseDate = new Date(offsetInMilliseconds);
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm "); // Adjust format for 12-hour clock (a for AM/PM), exclude seconds
+        String fTime = formatter.format(sunriseDate);
+        return fTime;
     }
     private String getSunSetAndSunRise(long sunriseTimestamp){
         long sunriseTimeInMillis = sunriseTimestamp * 1000L;
-
         // Create a Date object from the timestamp
         Date sunriseDate = new Date(sunriseTimeInMillis);
-
-        // Format the date in the desired format (adjust format as needed)
         SimpleDateFormat formatter = new SimpleDateFormat("hh:mm "); // Adjust format for 12-hour clock (a for AM/PM), exclude seconds
         String formattedSunriseTime = formatter.format(sunriseDate);
         return formattedSunriseTime;
     }
-//    private void setWeatherIcon(String iconCode) {
-//        String iconName = iconCode + "@2x.png";
-//        String iconUrl = "https://openweathermap.org/img/wn/" + iconName;
-//
-//        // Download the icon using an AsyncTask or a background thread
-//        new DownloadImageTask().execute(iconUrl);
-//    }
-
-
-
-//    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-//
-//        @Override
-//        protected Bitmap doInBackground(String... urls) {
-//            String url = urls[0];
-//            Bitmap bitmap = null;
-//            try {
-//                URL imageUrl = new URL(url);
-//                HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
-//                connection.setDoInput(true);
-//                connection.connect();
-//                InputStream input = connection.getInputStream();
-//                bitmap = BitmapFactory.decodeStream(input);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            return bitmap;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Bitmap result) {
-//            if (result != null) {
-//                weather_icon.setImageBitmap(result);
-//            } else {
-//                // Handle the case where the image download failed
-//            }
-//        }
-//    }
-    private void SetIcons(String icon){
+    private int SetIcons(String icon){
         Map<String,Integer>iconMap=new HashMap<>();
-        iconMap.put("01d",R.drawable.sun_weather);
-        iconMap.put("01n",R.drawable.fullmoon_weather);
-        iconMap.put("02d",R.drawable.cloudy_weather);
+        iconMap.put("01d",R.drawable.weather_suns);
+        iconMap.put("01n",R.drawable.moon_cloud_weather);
+        iconMap.put("02d",R.drawable.cloudy_day);
         iconMap.put("02n",R.drawable.moon_cloud_weather);
-        iconMap.put("03d",R.drawable.cloudd);
-        iconMap.put("03n",R.drawable.cloudn);
-        iconMap.put("04d",R.drawable.scattered_clouds);
-        iconMap.put("04n",R.drawable.scattered_clouds);
+        iconMap.put("03d",R.drawable.cloudy_day);
+        iconMap.put("03n",R.drawable.cloudy_night);
+        iconMap.put("04d",R.drawable.cloudy_day);
+        iconMap.put("04n",R.drawable.cloudy_night);
         iconMap.put("09d",R.drawable.sun_shower_weather);
-        iconMap.put("09n",R.drawable.rain_icon);
-        iconMap.put("10d",R.drawable.rain);
-        iconMap.put("11d",R.drawable.thunderstorm);
-        iconMap.put("11n",R.drawable.thunderstorm);
-        iconMap.put("13d",R.drawable.snowflake_weather);
-        iconMap.put("13n",R.drawable.snowflake_weather);
-        iconMap.put("50d",R.drawable.mist_weather);
-        iconMap.put("50n",R.drawable.mist_weather);
+        iconMap.put("09n",R.drawable.rain);
+        iconMap.put("10d",R.drawable.night_rain);
+        iconMap.put("11d",R.drawable.thunder);
+        iconMap.put("11n",R.drawable.thunderstorm_weather);
+        iconMap.put("13d",R.drawable.snowflakes);
+        iconMap.put("13n",R.drawable.weather_snows);
+        iconMap.put("50d",R.drawable.mist_day);
+        iconMap.put("50n",R.drawable.mist_night);
         Integer iconResourceId = iconMap.get(icon);
         if(iconResourceId!=null){
-            weather_icon.setImageResource(iconResourceId);
+           return iconResourceId;
         }
+        return 0;
+    }
+    private int getWeatherIcon(int icon){
+        Map<Integer,Integer>IconValue=new HashMap<>();
+        IconValue.put(0,R.drawable.clear_sky);
+        IconValue.put(1,R.drawable.clear_sky);
+        IconValue.put(2,R.drawable.partly_cloud);
+        IconValue.put(3,R.drawable.overcast_cloud);
+        IconValue.put(45,R.drawable.fogs);
+        IconValue.put(48,R.drawable.fogs);
+        IconValue.put(51,R.drawable.downpour);
+        IconValue.put(53,R.drawable.downpour);
+        IconValue.put(55,R.drawable.downpour);
+        IconValue.put(56,R.drawable.downpour);
+        IconValue.put(57,R.drawable.downpour);
+        IconValue.put(61,R.drawable.rain);
+        IconValue.put(63,R.drawable.rain);
+        IconValue.put(65,R.drawable.heavy_rain);
+        IconValue.put(66,R.drawable.rain);
+        IconValue.put(67,R.drawable.heavy_rain);
+        IconValue.put(71,R.drawable.snows);
+        IconValue.put(73,R.drawable.light_snow);
+        IconValue.put(75,R.drawable.snowflakes);
+        IconValue.put(77,R.drawable.snowflake);
+        IconValue.put(80,R.drawable.rain);
+        IconValue.put(81,R.drawable.heavy_rain);
+        IconValue.put(82,R.drawable.rain);
+        IconValue.put(85,R.drawable.heavy_rain);
+        IconValue.put(86,R.drawable.snowflakes);
+        IconValue.put(95,R.drawable.thunderstrom_day);
+        IconValue.put(96,R.drawable.thunder);
+        IconValue.put(99,R.drawable.thunderstorm_weather);
+        Integer iconResourceId = IconValue.get(icon);
+        if(iconResourceId!=null){
+            return iconResourceId;
+        }
+        return 0;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private List<String>get24HourTimeForecast(List<String>time24hour){
+        List<String>newString=new ArrayList<>();
+        int currentTimeindexNum=getCurrentIndex(time24hour);
+        int sum=(24+currentTimeindexNum);
+        int j=0;
+        for(int i=currentTimeindexNum;i<sum;i++){
+            if(i==currentTimeindexNum){
+                newString.add(j,"Now");
+            }
+            else{
+            newString.add(j,time24hour.get(i).substring(11,16));}
+            j++;
+        }
+        return newString;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private int getCurrentIndex(List<String> time24hour) {
+        int currentTime=Integer.parseInt(getCurrentTime());
+        int i=0;
+        while(i<24){
+            if(currentTime==Integer.parseInt(time24hour.get(i).substring(11,13))){
+                return i;
+            }
+            i++;
+        }
+        return 0;
+    }
+
+    private List<Double>get24HourTempForecast(List<Double>temp24Hour){
+        List<Double>newDouble=new ArrayList<>();
+        for(int i=0;i<24;i++){
+            newDouble.add(i, temp24Hour.get(i));
+        }
+        return newDouble;
+    }
+    private List<Integer>get24WeatherCode(List<Integer>getWeatherCode){
+        List<Integer>newInteger=new ArrayList<>();
+        for(int i=0;i<24;i++){
+            newInteger.add(i,getWeatherCode.get(i));
+        }
+        return newInteger;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private List<String>get6DayTimeForecast(List<String>time24hour){
+        List<String>newString=new ArrayList<>();
+        int i=1;
+        int j=0;
+        while(i<=time24hour.size()){
+            if(i>=time24hour.size()){
+                newString.add(j,time24hour.get(i-1).substring(0,10));
+            }
+            if(j<=1){
+                if(j==0){
+                    newString.add(j,"Today");
+                }
+                else{
+                    newString.add(j,"Tomorrow");
+                }
+            }
+            else {
+                newString.add(j, getDayName(time24hour.get(i).substring(0, 10)));
+            }
+            i+=24;
+            j++;
+        }
+        return newString;
+    }
+    private List<Double>get6DayTempForecast(List<Double>temp24Hour){
+        List<Double>newDouble=new ArrayList<>();
+        int i=1;
+        int j=0;
+        while(i<=temp24Hour.size()){
+            if(i>=temp24Hour.size()){
+                newDouble.add(j,temp24Hour.get(i-1));
+            }
+            newDouble.add(j,temp24Hour.get(i));
+            i+=24;
+            j++;
+        }
+        return newDouble;
+    }
+    private List<Integer>get6DayWeatherCode(List<Integer>getWeatherCode){
+        List<Integer>newInteger=new ArrayList<>();
+        int i=1;
+        int j=0;
+        while(i<=getWeatherCode.size()){
+            if(i>=getWeatherCode.size()){
+                newInteger.add(j,getWeatherCode.get(i-1));
+            }
+            newInteger.add(j,getWeatherCode.get(i));
+            i+=24;
+            j++;
+        }
+        return newInteger;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private String getDayName(String dataString){
+        String dayName="";
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate date = LocalDate.parse(dataString, formatter);
+            // Getting the day name
+            dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+            System.out.println("Day name: " + dayName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dayName;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private String getCurrentTime(){
+        LocalTime currentTime = LocalTime.now();
+
+        // Format the hour component in 24-hour format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH");
+        String hour24Format = currentTime.format(formatter);
+        return hour24Format;
     }
 }
+
