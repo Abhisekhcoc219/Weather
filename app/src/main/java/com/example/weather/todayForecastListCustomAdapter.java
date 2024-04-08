@@ -27,9 +27,11 @@ public class todayForecastListCustomAdapter extends RecyclerView.Adapter<todayFo
     @Override
     public void onBindViewHolder(@NonNull todayForecastListCustomAdapter.ViewHolder holder, int position) {
         String temp=String.valueOf(Math.round(todayForecastListCustomAdapterArrayList.get(position).getTemperature()))+Celius;
-    holder.firstText.setText(todayForecastListCustomAdapterArrayList.get(position).getTime());
+        String time=todayForecastListCustomAdapterArrayList.get(position).getTime();
+        int cloudId=todayForecastListCustomAdapterArrayList.get(position).getCloudIcon();
+    holder.firstText.setText(time);
     holder.secondText.setText(temp);
-    holder.cloudImg.setImageResource(todayForecastListCustomAdapterArrayList.get(position).getCloudIcon());
+    holder.cloudImg.setImageResource(cloudId);
     }
 
     @Override

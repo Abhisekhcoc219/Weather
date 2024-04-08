@@ -233,10 +233,11 @@ public class HomeFragment extends Fragment {
     private List<Double> get24HourTempForecast(List<Double> temp24Hour) {
         List<Double> newDouble = new ArrayList<>();
         int sum = (indexNum + 24);
+//        Log.e("TAGP",""+indexNum+" "+sum+" "+currentWeatherForecastResponse.getMain().getTemp());
         int j = 0;
         if (indexNum >= 0) {
             for (int i = indexNum; i < sum; i++) {
-                if (i == indexNum) {
+                if (j==0) {
                     if (currentWeatherForecastResponse != null) {
                         newDouble.add(j, currentWeatherForecastResponse.getMain().getTemp());
                     }
@@ -255,7 +256,7 @@ public class HomeFragment extends Fragment {
         int j = 0;
         if (indexNum >= 0) {
             for (int i = indexNum; i < sum; i++) {
-                if (i == indexNum) {
+                if (j == 0) {
                     if (currentWeatherForecastResponse != null) {
                         newInteger.add(j, SetIcons(currentWeatherForecastResponse.getArrayListWeather().get(0).getIcon()));
                     }
@@ -381,12 +382,6 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "wifi is not connect to devices ", Toast.LENGTH_SHORT).show();
             }
         }
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                fetchDataFromServer();
-            }
-        });
         return view;
     }
 
@@ -401,7 +396,7 @@ public class HomeFragment extends Fragment {
                 // Notify SwipeRefreshLayout that the refresh has finished
                 swipeRefreshLayout.setRefreshing(false);
             }
-        }, 2000); // 2 seconds delay
+        }, 2500); // 2 seconds delay
 
     }
 
@@ -428,6 +423,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchDataFromServer();
+            }
+        });
     }
 
     private void getPermission(View v) {
@@ -489,6 +490,7 @@ public class HomeFragment extends Fragment {
                         if (InternetUtils.isMobileDataAvailable(requireActivity()) || WifiUtils.isWifiEnable(requireActivity())) {
                             getResponseWeatherApi(location.getLatitude(), location.getLongitude(), "metric", RetrofitClient.getOpenWeatherApiKey(), v);
                             getResponseFor6Days(location.getLatitude(), location.getLongitude(), "temperature_2m", "temperature_2m,weathercode", v);
+                            Toast.makeText(requireActivity(), "yesss", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(requireActivity(), "please enable data", Toast.LENGTH_SHORT).show();
                         }
@@ -610,15 +612,20 @@ public class HomeFragment extends Fragment {
         List<String> time24Hour = get24HourTimeForecast(weekWeatherResponse.getHourly().getTime());
         List<Double> temp24Hour = get24HourTempForecast(weekWeatherResponse.getHourly().getTemperature2m());
         List<Integer> weatherCode24Hour = get24WeatherCode(weekWeatherResponse.getHourly().getWeatherCode());
+//        for (int i=0;i<time24Hour.size();i++){
+//            Log.e("TAGP",time24Hour.get(i));
+//        }
         arrayListForTodayForcast = new ArrayList<>();
-//        recyclerViewTodayForecast = view.findViewById(R.id.today_forecast_recycler);
-//        recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewTodayForecast = view.findViewById(R.id.today_forecast_recycler);
+        recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 //        Toast.makeText(requireActivity(), "t "+time24Hour.size()+" tem"+temp24Hour.size()+" c"+weatherCode24Hour.size(), Toast.LENGTH_SHORT).show();
         for (int i = 0; i < time24Hour.size(); i++) {
-            arrayListForTodayForcast.add(i, new todayForecastDataClass(time24Hour.get(i), temp24Hour.get(i), weatherCode24Hour.get(i)));
-//        }
+            arrayListForTodayForcast.add(i, new todayForecastDataClass(time24Hour.get(i),temp24Hour.get(i) ,weatherCode24Hour.get(i)));
+        }
+
+//        temp24Hour.get(i) weatherCode24Hour.get(i)
+
             todayForecastListCustomAdapter = new todayForecastListCustomAdapter(arrayListForTodayForcast);
             recyclerViewTodayForecast.setAdapter(todayForecastListCustomAdapter);
         }
     }
-}
