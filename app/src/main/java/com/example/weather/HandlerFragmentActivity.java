@@ -24,10 +24,8 @@ public class HandlerFragmentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_handler_fragment);
         bottomNavbar=findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem home=new AHBottomNavigationItem(R.string.home,R.drawable.home,R.color.light_blue);
-        AHBottomNavigationItem search=new AHBottomNavigationItem(R.string.search,R.drawable.search,R.color.light_blue);
         AHBottomNavigationItem setting=new AHBottomNavigationItem(R.string.setting,R.drawable.settings,R.color.light_blue);
       bottomNavbar.addItem(home);
-      bottomNavbar.addItem(search);
       bottomNavbar.addItem(setting);
       bottomNavbar.setDefaultBackgroundColor(Color.parseColor("#659BFB"));
       bottomNavbar.setAccentColor(Color.parseColor("#0059E7"));
@@ -39,9 +37,6 @@ public class HandlerFragmentActivity extends AppCompatActivity {
                   fragementTractions(new HomeFragment());
                   break;
               case 1:
-                  fragementTractions(new SearchFragment());
-                  break;
-              case 2:
                   fragementTractions(new SettingsFragment());
                   break;
           }

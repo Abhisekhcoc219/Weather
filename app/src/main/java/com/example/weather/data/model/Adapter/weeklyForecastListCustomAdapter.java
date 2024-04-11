@@ -1,7 +1,4 @@
-package com.example.weather;
-
-import static com.example.weather.todayForecastListCustomAdapter.*;
-
+package com.example.weather.data.model.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +8,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weather.R;
+import com.example.weather.data.model.forecastDataModel.weeklyForecastDataClass;
+
 import java.util.ArrayList;
 
 public class weeklyForecastListCustomAdapter extends RecyclerView.Adapter<weeklyForecastListCustomAdapter.ViewHolder> {
     private ArrayList<weeklyForecastDataClass>weeklyForecastListAdapterArrayLists;
 
-    weeklyForecastListCustomAdapter(ArrayList<weeklyForecastDataClass>weeklyForecastDataClassArrayList){
+    public weeklyForecastListCustomAdapter(ArrayList<weeklyForecastDataClass> weeklyForecastDataClassArrayList){
         this.weeklyForecastListAdapterArrayLists=weeklyForecastDataClassArrayList;
     }
     @NonNull
@@ -29,7 +29,7 @@ public class weeklyForecastListCustomAdapter extends RecyclerView.Adapter<weekly
     @Override
     public void onBindViewHolder(@NonNull weeklyForecastListCustomAdapter.ViewHolder holder, int position) {
        holder.firstText.setText(weeklyForecastListAdapterArrayLists.get(position).getTime());
-       holder.secondText.setText(""+Math.round(weeklyForecastListAdapterArrayLists.get(position).getTemperature())+Celius);
+       holder.secondText.setText(""+Math.round(weeklyForecastListAdapterArrayLists.get(position).getTemperature())+"°");
        holder.cloudImg.setImageResource(weeklyForecastListAdapterArrayLists.get(position).getCloudIcon());
     }
 

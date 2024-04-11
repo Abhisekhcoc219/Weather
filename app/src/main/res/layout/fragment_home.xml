@@ -21,44 +21,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
-         <LinearLayout
-             android:id="@+id/HomeLLayout1"
-             android:layout_width="match_parent"
-             app:layout_constraintTop_toTopOf="parent"
-             app:layout_constraintStart_toStartOf="parent"
-             app:layout_constraintEnd_toEndOf="parent"
-             android:layout_marginTop="@dimen/_10sdp"
-             android:layout_height="wrap_content">
-             <LinearLayout
-                 android:layout_width="@dimen/_220sdp"
-                 android:layout_height="@dimen/_25sdp">
-             <TextView
-                 android:layout_marginStart="@dimen/_15sdp"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:textColor="@color/white"
-                 android:fontFamily="@font/abeezee"
-                 android:textSize="@dimen/_15sdp"
-                 android:text="Hi,"/>
-             <TextView
-                 android:layout_marginStart="@dimen/_5sdp"
-                 android:layout_width="wrap_content"
-                 android:fontFamily="@font/abeezee"
-                 android:layout_height="wrap_content"
-                 android:textColor="@color/white"
-                 android:textSize="@dimen/_15sdp"
-                 android:id="@+id/UserName"
-                 android:text=""/>
-             </LinearLayout>
-             <ImageView
-                 android:layout_width="@dimen/_25sdp"
-                 android:layout_height="@dimen/_25sdp"
-                 android:src="@drawable/realloction"
-                 android:layout_gravity="center"
-                 android:id="@+id/reallocation"
-                 android:layout_marginStart="@dimen/_40sdp"
-                 android:contentDescription="TODO" />
-         </LinearLayout>
+
+            <androidx.appcompat.widget.SearchView
+                android:layout_marginTop="@dimen/_20sdp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="@dimen/_230sdp"
+                android:layout_height="wrap_content"
+                android:id="@+id/searchView"
+                android:background="@drawable/search_view_radius"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -66,8 +38,8 @@
                 android:id="@+id/HomeLLayout2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="@dimen/_17sdp"
-                app:layout_constraintTop_toBottomOf="@id/HomeLLayout1"
+                android:layout_marginTop="@dimen/_30sdp"
+                app:layout_constraintTop_toBottomOf="@id/searchView"
                 >
                 <ImageView
                     android:layout_width="@dimen/_25sdp"
@@ -186,7 +158,7 @@
                 app:layout_constraintTop_toBottomOf="@id/today_forecast">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/today_forecast_recycler"
+                    android:id="@+id/todayForecastRecyclerView"
                     android:layout_width="@dimen/_260sdp"
                     android:layout_height="@dimen/_90sdp"
                     android:layout_marginTop="@dimen/_14sdp"

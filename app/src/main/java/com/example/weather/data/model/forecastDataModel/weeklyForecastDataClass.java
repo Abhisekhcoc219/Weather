@@ -1,10 +1,10 @@
-package com.example.weather;
+package com.example.weather.data.model.forecastDataModel;
 
 public class weeklyForecastDataClass {
     private String time;
     private double temperature;
     private int cloudIcon;
-    weeklyForecastDataClass(String time,double temp,int icon)
+    public weeklyForecastDataClass(String time, double temp, int icon)
     {
         this.time=time;
         this.temperature=temp;

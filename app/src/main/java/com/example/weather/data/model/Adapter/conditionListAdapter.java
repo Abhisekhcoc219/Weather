@@ -1,4 +1,4 @@
-package com.example.weather;
+package com.example.weather.data.model.Adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +9,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weather.R;
+import com.example.weather.data.model.forecastDataModel.conditionDataClass;
+
 import java.util.ArrayList;
 
 public class conditionListAdapter extends RecyclerView.Adapter<conditionListAdapter.ViewHolder> {
     private ArrayList<conditionDataClass>conditionDataClassesList=new ArrayList<>();
-    conditionListAdapter(ArrayList<conditionDataClass>conditionDataClassesLists){
+    public conditionListAdapter(ArrayList<conditionDataClass> conditionDataClassesLists){
         this.conditionDataClassesList=conditionDataClassesLists;
     }
     @NonNull

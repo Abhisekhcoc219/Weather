@@ -6,14 +6,11 @@ import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -38,9 +35,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.weather.data.model.Adapter.conditionListAdapter;
+import com.example.weather.data.model.Adapter.todayForecastAdapter;
+import com.example.weather.data.model.Adapter.weeklyForecastListCustomAdapter;
 import com.example.weather.data.model.ApiPackage.RetrofitClient;
 import com.example.weather.data.model.currentForecastModelClass.CurrentWeatherForecastResponse;
 import com.example.weather.data.model.currentWeekForecastModelClass.CurrentWeekWeatherResponse;
+import com.example.weather.data.model.forecastDataModel.conditionDataClass;
+import com.example.weather.data.model.forecastDataModel.todayForecastModel;
+import com.example.weather.data.model.forecastDataModel.weeklyForecastDataClass;
 import com.example.weather.data.model.mobilePermissions.GpsUtils;
 import com.example.weather.data.model.mobilePermissions.InternetUtils;
 import com.example.weather.data.model.mobilePermissions.WifiUtils;
@@ -78,16 +81,19 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
     private RecyclerView recyclerViewTodayForecast, recyclerViewWeeklyForecast, recyclerViewWeatherCondition;
-    private ArrayList<todayForecastDataClass> arrayListForTodayForcast;
     private ArrayList<weeklyForecastDataClass> arrayListWeeklyForecast;
+    private ArrayList<todayForecastModel>todayForecastModelArrayList;
     private weeklyForecastListCustomAdapter weeklyForecastListCustomAdapters;
-    private todayForecastListCustomAdapter todayForecastListCustomAdapter;
-    private conditionListAdapter conditionListAdapter;
+    private todayForecastAdapter todayForecastAdapter;
+    private com.example.weather.data.model.Adapter.conditionListAdapter conditionListAdapter;
     private ArrayList<conditionDataClass> arrayList_conditionDataClass;
     private ImageView weather_icon;
+    private double temperatures;
+    private int iconsId;
+
     private CurrentWeatherForecastResponse currentWeatherForecastResponse;
     private static final String Celius = "°";
-    private TextView cityName, userName, current_temp, time, sunset, sunrise, weatherCondition;
+    private TextView cityName, current_temp, time, sunset, sunrise, weatherCondition;
     private int PERMISSION_REQUEST_CODE = 123;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -198,23 +204,7 @@ public class HomeFragment extends Fragment {
         return 0;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private List<String> get24HourTimeForecast(List<String> time24hour) {
-        List<String> newString = new ArrayList<>();
-        int currentTimeindexNum = getCurrentIndex(time24hour);
-        indexNum = currentTimeindexNum;
-        int sum = (24 + currentTimeindexNum);
-        int j = 0;
-        for (int i = currentTimeindexNum; i < sum; i++) {
-            if (i == currentTimeindexNum) {
-                newString.add(j, "Now");
-            } else {
-                newString.add(j, time24hour.get(i).substring(11, 16));
-            }
-            j++;
-        }
-        return newString;
-    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int getCurrentIndex(List<String> time24hour) {
@@ -228,45 +218,6 @@ public class HomeFragment extends Fragment {
             i++;
         }
         return 0;
-    }
-
-    private List<Double> get24HourTempForecast(List<Double> temp24Hour) {
-        List<Double> newDouble = new ArrayList<>();
-        int sum = (indexNum + 24);
-//        Log.e("TAGP",""+indexNum+" "+sum+" "+currentWeatherForecastResponse.getMain().getTemp());
-        int j = 0;
-        if (indexNum >= 0) {
-            for (int i = indexNum; i < sum; i++) {
-                if (j==0) {
-                    if (currentWeatherForecastResponse != null) {
-                        newDouble.add(j, currentWeatherForecastResponse.getMain().getTemp());
-                    }
-                } else {
-                    newDouble.add(j, temp24Hour.get(i));
-                }
-                j++;
-            }
-        }
-        return newDouble;
-    }
-
-    private List<Integer> get24WeatherCode(List<Integer> getWeatherCode) {
-        List<Integer> newInteger = new ArrayList<>();
-        int sum = (indexNum + 24);
-        int j = 0;
-        if (indexNum >= 0) {
-            for (int i = indexNum; i < sum; i++) {
-                if (j == 0) {
-                    if (currentWeatherForecastResponse != null) {
-                        newInteger.add(j, SetIcons(currentWeatherForecastResponse.getArrayListWeather().get(0).getIcon()));
-                    }
-                } else {
-                    newInteger.add(j, getWeatherIcon(getWeatherCode.get(i)));
-                }
-                j++;
-            }
-        }
-        return newInteger;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -382,6 +333,7 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "wifi is not connect to devices ", Toast.LENGTH_SHORT).show();
             }
         }
+
         return view;
     }
 
@@ -396,7 +348,7 @@ public class HomeFragment extends Fragment {
                 // Notify SwipeRefreshLayout that the refresh has finished
                 swipeRefreshLayout.setRefreshing(false);
             }
-        }, 2500); // 2 seconds delay
+        }, 2000); // 2 seconds delay
 
     }
 
@@ -410,7 +362,6 @@ public class HomeFragment extends Fragment {
 
     private void HomeViewInit(View view) {
         cityName = view.findViewById(R.id.cityName);
-        userName = view.findViewById(R.id.UserName);
         weather_icon = view.findViewById(R.id.weather_condition_cloud);
         current_temp = view.findViewById(R.id.current_Temp);
         time = view.findViewById(R.id.Time);
@@ -536,12 +487,10 @@ public class HomeFragment extends Fragment {
 
     private void dataSetOnViews(CurrentWeatherForecastResponse currentWeather) {
         if (currentWeather != null) {
-            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
             String feels_like = "feels like:- " + Math.round(currentWeather.getMain().getFeelsLike()) + Celius;
             String temp = String.valueOf(Math.round(currentWeather.getMain().getTemp())) + Celius;
-            if (u != null) {
-                userName.setText(u.getDisplayName());
-            }
+            temperatures=Math.round(currentWeather.getMain().getTemp());
+            iconsId=SetIcons(currentWeather.getArrayListWeather().get(0).getIcon());
             cityName.setText(currentWeather.getName());
             current_temp.setText(temp);
             time.setText(feels_like);
@@ -580,7 +529,13 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<CurrentWeekWeatherResponse> call, Response<CurrentWeekWeatherResponse> response) {
                 CurrentWeekWeatherResponse weekWeatherResponse = response.body();
 //              Log.e("TAGS",""+response.body().getHourly().getTemperature2m());
-                todayForecastViewInitAndSet(v, weekWeatherResponse);//this one today forecast view
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                     todayForecastViewInitAndSet(v, weekWeatherResponse);//this one today forecast view
+                    }
+                },800);
+
                 weeklyForecastViewInitAndSet(v, weekWeatherResponse);
             }
 
@@ -609,23 +564,74 @@ public class HomeFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void todayForecastViewInitAndSet(View view, CurrentWeekWeatherResponse weekWeatherResponse) {
-        List<String> time24Hour = get24HourTimeForecast(weekWeatherResponse.getHourly().getTime());
-        List<Double> temp24Hour = get24HourTempForecast(weekWeatherResponse.getHourly().getTemperature2m());
-        List<Integer> weatherCode24Hour = get24WeatherCode(weekWeatherResponse.getHourly().getWeatherCode());
-//        for (int i=0;i<time24Hour.size();i++){
-//            Log.e("TAGP",time24Hour.get(i));
-//        }
-        arrayListForTodayForcast = new ArrayList<>();
-        recyclerViewTodayForecast = view.findViewById(R.id.today_forecast_recycler);
-        recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-//        Toast.makeText(requireActivity(), "t "+time24Hour.size()+" tem"+temp24Hour.size()+" c"+weatherCode24Hour.size(), Toast.LENGTH_SHORT).show();
-        for (int i = 0; i < time24Hour.size(); i++) {
-            arrayListForTodayForcast.add(i, new todayForecastDataClass(time24Hour.get(i),temp24Hour.get(i) ,weatherCode24Hour.get(i)));
+     todayForecastModelArrayList=new ArrayList<>();
+     recyclerViewTodayForecast=view.findViewById(R.id.todayForecastRecyclerView);
+     recyclerViewTodayForecast.setLayoutManager(new LinearLayoutManager(getContext(),RecyclerView.HORIZONTAL,false));
+     List<String>time=getTodayTime(weekWeatherResponse.getHourly().getTime());
+     List<Double>temp=getTodayTemperature(weekWeatherResponse.getHourly().getTemperature2m(),weekWeatherResponse.getHourly().getTime());
+     List<Integer>icons=getTodayCloudIcon(weekWeatherResponse.getHourly().getWeatherCode(),weekWeatherResponse.getHourly().getTime());
+    Log.e("TAGSS",""+temp.get(0));
+     for (int i=0;i<time.size();i++){
+     todayForecastModelArrayList.add(i, new todayForecastModel(time.get(i), temp.get(i),icons.get(i)));
+     }
+     todayForecastAdapter=new todayForecastAdapter(todayForecastModelArrayList);
+     recyclerViewTodayForecast.setAdapter(todayForecastAdapter);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private List<String> getTodayTime(List<String>time){
+    List<String>time24Hour=new ArrayList<>();
+    int currentIndex=getCurrentIndex(time);
+    int sum=(currentIndex+24);
+    int j=0;
+    int i=currentIndex;
+    while(i<sum){
+        if(j==0){
+            time24Hour.add(j,"Now");
         }
-
-//        temp24Hour.get(i) weatherCode24Hour.get(i)
-
-            todayForecastListCustomAdapter = new todayForecastListCustomAdapter(arrayListForTodayForcast);
-            recyclerViewTodayForecast.setAdapter(todayForecastListCustomAdapter);
+        else{
+            time24Hour.add(j,time.get(i).substring(11,16));
         }
+        i++;
+        j++;
+    }
+    return time24Hour;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private List<Double>getTodayTemperature(List<Double>temperature,List<String>t){
+        List<Double>temp=new ArrayList<>();
+        int currentIndex=getCurrentIndex(t);
+        int sum=(currentIndex+24);
+        int i=currentIndex;
+        int j=0;
+        while (i<sum){
+            if(j==0){
+                temp.add(j,temperatures);
+            }
+            else{
+                temp.add(j,temperature.get(i));
+            }
+            i++;
+            j++;
+        }
+        return temp;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private List<Integer>getTodayCloudIcon(List<Integer>cloudIcon, List<String>t){
+        List<Integer>Icons=new ArrayList<>();
+        int currentIndex=getCurrentIndex(t);
+        int sum=(currentIndex+24);
+        int i=currentIndex;
+        int j=0;
+        while (i<sum){
+            if(j==0){
+                Icons.add(j,iconsId);
+            }
+            else{
+                Icons.add(j,getWeatherIcon(cloudIcon.get(i)));
+            }
+            i++;
+            j++;
+        }
+        return Icons;
+    }
     }

@@ -1,4 +1,4 @@
-package com.example.weather;
+package com.example.weather.data.model.forecastDataModel;
 
 public class conditionDataClass {
     private String firstCondition,secondCondtion;
@@ -6,7 +6,7 @@ public class conditionDataClass {
     conditionDataClass(){
 
     }
-    conditionDataClass(String first_Condition,int imageCondition,String second_Condition){
+    public conditionDataClass(String first_Condition, int imageCondition, String second_Condition){
      this.firstCondition=first_Condition;
      this.imageCondition=imageCondition;
      this.secondCondtion=second_Condition;

@@ -9,21 +9,19 @@
    <TextView
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
-       android:text="fjdlkf"
        android:textColor="@color/white"
-       android:id="@+id/first_Text"
+       android:id="@+id/todayTime"
        android:textSize="@dimen/_12sdp"/>
     <ImageView
         android:layout_width="@dimen/_22sdp"
         android:layout_height="@dimen/_22sdp"
         android:src="@drawable/half_moon"
-        android:id="@+id/cloud_img"
+        android:id="@+id/todayCloud"
         android:layout_marginTop="@dimen/_10sdp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="20C"
-        android:id="@+id/second_Text"
+        android:id="@+id/todayTemperature"
         android:textSize="@dimen/_12sdp"
         android:textColor="@color/white"
         android:layout_marginTop="@dimen/_10sdp"/>
