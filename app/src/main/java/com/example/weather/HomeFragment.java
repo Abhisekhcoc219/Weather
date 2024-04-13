@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -44,6 +45,7 @@ import com.example.weather.data.model.currentWeekForecastModelClass.CurrentWeekW
 import com.example.weather.data.model.forecastDataModel.conditionDataClass;
 import com.example.weather.data.model.forecastDataModel.todayForecastModel;
 import com.example.weather.data.model.forecastDataModel.weeklyForecastDataClass;
+import com.example.weather.data.model.geocodingLocation.locations;
 import com.example.weather.data.model.mobilePermissions.GpsUtils;
 import com.example.weather.data.model.mobilePermissions.InternetUtils;
 import com.example.weather.data.model.mobilePermissions.WifiUtils;
@@ -59,8 +61,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -87,17 +87,17 @@ public class HomeFragment extends Fragment {
     private todayForecastAdapter todayForecastAdapter;
     private com.example.weather.data.model.Adapter.conditionListAdapter conditionListAdapter;
     private ArrayList<conditionDataClass> arrayList_conditionDataClass;
-    private ImageView weather_icon;
+    private ImageView weather_icon,locationIcon,reallocations;
     private double temperatures;
+    private String mutableCityName=null;
     private int iconsId;
-
+    private SearchView searchView;
     private CurrentWeatherForecastResponse currentWeatherForecastResponse;
     private static final String Celius = "°";
     private TextView cityName, current_temp, time, sunset, sunrise, weatherCondition;
     private int PERMISSION_REQUEST_CODE = 123;
+    private boolean isSearchData=false;
     private FusedLocationProviderClient fusedLocationProviderClient;
-
-    private LocationManager locationManager;
     private LocationRequest locationRequest;
     private Location locations;
     private int indexNum = -1;
@@ -333,8 +333,70 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireActivity(), "wifi is not connect to devices ", Toast.LENGTH_SHORT).show();
             }
         }
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(requireActivity(), query, Toast.LENGTH_SHORT).show();
+                searchingLocation(query,views);
+                searchView.setQuery("", false);
 
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+//                Toast.makeText(requireActivity(), "hello", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        reallocations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isSearchData=false;
+                        fetchDataFromServer();
+                    }
+                },350);
+            }
+        });
         return view;
+    }
+    private void searchingLocation(String cityName,View v){
+        RetrofitClient.getGeocodingApi().getLatLon(cityName,1,RetrofitClient.getOpenWeatherApiKey()).enqueue(new Callback<List<com.example.weather.data.model.geocodingLocation.locations>>() {
+            @Override
+            public void onResponse(Call<List<com.example.weather.data.model.geocodingLocation.locations>> call, Response<List<com.example.weather.data.model.geocodingLocation.locations>> response) {
+                if(response.isSuccessful()){
+                    List<locations>data=response.body();
+                    if(data!=null &&!data.isEmpty()){
+                        if(InternetUtils.isMobileDataAvailable(requireActivity())||WifiUtils.isWifiEnable(requireActivity())){
+                            isSearchData=true;
+                            mutableCityName=cityName;
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    locationIcon.setVisibility(View.GONE);
+                                    getResponseWeatherApi(data.get(0).getLat(),data.get(0).getLon(),"metric", RetrofitClient.getOpenWeatherApiKey(),v);
+                                    getResponseFor6Days(data.get(0).getLat(),data.get(0).getLon(),"temperature_2m", "temperature_2m,weathercode", v);
+                                }
+                            },600);
+                        }
+                        else{
+                            Toast.makeText(requireActivity(), "please enable data", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                    else{
+                        Toast.makeText(requireActivity(), "invaild city name", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<com.example.weather.data.model.geocodingLocation.locations>> call, Throwable throwable) {
+                Log.e("TAGFAIL",throwable.getLocalizedMessage());
+            }
+        });
     }
 
     private void fetchDataFromServer() {
@@ -344,7 +406,19 @@ public class HomeFragment extends Fragment {
             @Override
             public void run() {
                 // Update your UI with refreshed data
-                refreshing();
+                if(isSearchData){
+                    if(mutableCityName!=null) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                             searchingLocation(mutableCityName,views);
+                            }
+                        },550);
+                    }
+                }
+                else{
+                    refreshing();
+                }
                 // Notify SwipeRefreshLayout that the refresh has finished
                 swipeRefreshLayout.setRefreshing(false);
             }
@@ -361,6 +435,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void HomeViewInit(View view) {
+        searchView=view.findViewById(R.id.searchView);
         cityName = view.findViewById(R.id.cityName);
         weather_icon = view.findViewById(R.id.weather_condition_cloud);
         current_temp = view.findViewById(R.id.current_Temp);
@@ -369,6 +444,8 @@ public class HomeFragment extends Fragment {
         sunrise = view.findViewById(R.id.whenSunrise);
         weatherCondition = view.findViewById(R.id.weather_description);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        locationIcon=view.findViewById(R.id.location_icons);
+        reallocations=view.findViewById(R.id.reallocation);
     }
 
     @Override
@@ -437,11 +514,11 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        Toast.makeText(requireActivity(), "" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(requireActivity(), "" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                         if (InternetUtils.isMobileDataAvailable(requireActivity()) || WifiUtils.isWifiEnable(requireActivity())) {
                             getResponseWeatherApi(location.getLatitude(), location.getLongitude(), "metric", RetrofitClient.getOpenWeatherApiKey(), v);
                             getResponseFor6Days(location.getLatitude(), location.getLongitude(), "temperature_2m", "temperature_2m,weathercode", v);
-                            Toast.makeText(requireActivity(), "yesss", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(requireActivity(), "yesss", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(requireActivity(), "please enable data", Toast.LENGTH_SHORT).show();
                         }
@@ -473,7 +550,7 @@ public class HomeFragment extends Fragment {
                 if (currentWeatherForecastResponse == null) {
                     currentWeatherForecastResponse = response.body();
                 }
-                Log.e("ssssssss", weather.getName());
+//                Log.e("ssssssss", weather.getName());
                 dataSetOnViews(weather);
                 weatherConditionViewInit(v, weather);
             }
@@ -487,6 +564,9 @@ public class HomeFragment extends Fragment {
 
     private void dataSetOnViews(CurrentWeatherForecastResponse currentWeather) {
         if (currentWeather != null) {
+            if(!isSearchData){
+                locationIcon.setVisibility(View.VISIBLE);
+            }
             String feels_like = "feels like:- " + Math.round(currentWeather.getMain().getFeelsLike()) + Celius;
             String temp = String.valueOf(Math.round(currentWeather.getMain().getTemp())) + Celius;
             temperatures=Math.round(currentWeather.getMain().getTemp());
@@ -570,7 +650,7 @@ public class HomeFragment extends Fragment {
      List<String>time=getTodayTime(weekWeatherResponse.getHourly().getTime());
      List<Double>temp=getTodayTemperature(weekWeatherResponse.getHourly().getTemperature2m(),weekWeatherResponse.getHourly().getTime());
      List<Integer>icons=getTodayCloudIcon(weekWeatherResponse.getHourly().getWeatherCode(),weekWeatherResponse.getHourly().getTime());
-    Log.e("TAGSS",""+temp.get(0));
+//    Log.e("TAGSS",""+temp.get(0));
      for (int i=0;i<time.size();i++){
      todayForecastModelArrayList.add(i, new todayForecastModel(time.get(i), temp.get(i),icons.get(i)));
      }

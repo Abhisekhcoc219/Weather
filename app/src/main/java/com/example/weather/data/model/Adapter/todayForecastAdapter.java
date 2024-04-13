@@ -32,7 +32,7 @@ public class todayForecastAdapter extends RecyclerView.Adapter<todayForecastAdap
 
     @Override
     public void onBindViewHolder(@NonNull todayForecastAdapter.ViewHolder holder, int position) {
-        String temp=""+Math.round(todayForecastModelArrayList.get(position).getTemperature());
+        String temp=""+Math.round(todayForecastModelArrayList.get(position).getTemperature())+"°";
     holder.time.setText(todayForecastModelArrayList.get(position).getTime());
     holder.temperature.setText(temp);
     holder.Icon.setImageResource(todayForecastModelArrayList.get(position).getWeatherIcon());

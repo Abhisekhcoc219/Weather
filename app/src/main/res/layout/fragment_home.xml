@@ -6,7 +6,7 @@
     android:background="@drawable/gradint_home"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".HomeFragment">
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -22,12 +22,23 @@
             android:layout_height="wrap_content"
             >
 
+            <ImageView
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:src="@drawable/realloction"
+                android:id="@+id/reallocation"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/searchView"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <androidx.appcompat.widget.SearchView
-                android:layout_marginTop="@dimen/_20sdp"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reallocation"
+                android:layout_marginTop="@dimen/_10sdp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_width="@dimen/_230sdp"
+                android:layout_width="@dimen/_210sdp"
                 android:layout_height="wrap_content"
                 android:id="@+id/searchView"
                 android:background="@drawable/search_view_radius"/>
