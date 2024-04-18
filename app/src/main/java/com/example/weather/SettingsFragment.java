@@ -2,67 +2,109 @@ package com.example.weather;
 
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SettingsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class SettingsFragment extends Fragment {
+    private TextView name,email;
+    private ImageView Logout;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private FirebaseUser mUser;
+    private String Emails,Names;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public SettingsFragment() {
         // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Settings.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SettingsFragment newInstance(String param1, String param2) {
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View v= inflater.inflate(R.layout.fragment_settings, container, false);
+        Init(v);
+        dataInit();
+        name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CustomDialog customDialog=new CustomDialog(getContext(),false,"Change your name",Names,Emails);
+                customDialog.show(getChildFragmentManager(), "CustomDialogFragment");
+            }
+        });
+        email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            CustomDialog customDialog=new CustomDialog(requireActivity(),true,"Change your email",Names,Emails);
+            customDialog.show(getChildFragmentManager(),"CustomDialogFragment");
+            }
+        });
+        Logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                if(user==null){
+                 startActivity(new Intent(requireActivity(), SignInActivity.class));
+                }
+            }
+        });
+        return v;
+    }
+    private void Init(View v){
+        name=v.findViewById(R.id.userTextName);
+        email=v.findViewById(R.id.userEmail);
+        Logout=v.findViewById(R.id.logout);
+        db=FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+        mUser=mAuth.getCurrentUser();
+
+    }
+    private void dataInit(){
+        if(mUser!=null){
+            String names=mUser.getDisplayName();
+//            Toast.makeText(requireContext(), ""+mUser.getDisplayName(), Toast.LENGTH_SHORT).show();
+            DocumentReference docRef=db.collection("user").document(names+1);
+            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot.exists()){
+                        String names=documentSnapshot.getString("name");
+                        String emails=documentSnapshot.getString("email");
+                        Names=names;
+                        Emails=emails;
+                        name.setText(names);
+                        email.setText(emails);
+                    }
+                    else{
+                        Toast.makeText(requireContext(), "not exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(requireActivity(), ""+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }

@@ -313,7 +313,7 @@ public class HomeFragment extends Fragment {
         HomeViewInit(view);
         if (InternetUtils.isMobileDataAvailable(requireActivity())) {
             if (GpsUtils.isGpsEnable(requireActivity())) {
-                Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
                 getLiveLocation(view);
             } else {
                 Toast.makeText(requireActivity(), "gps is not on", Toast.LENGTH_SHORT).show();
@@ -323,14 +323,14 @@ public class HomeFragment extends Fragment {
             Toast.makeText(requireActivity(), "Please enable data", Toast.LENGTH_SHORT).show();
             if (WifiUtils.isWifiEnable(requireActivity())) {
                 if (GpsUtils.isGpsEnable(requireActivity())) {
-                    Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireActivity(), "already gps on", Toast.LENGTH_SHORT).show();
                     getLiveLocation(view);
                 } else {
                     Toast.makeText(requireActivity(), "gps is not on", Toast.LENGTH_SHORT).show();
                     getPermission(view);
                 }
             } else {
-                Toast.makeText(requireActivity(), "wifi is not connect to devices ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity(), "wifi is not connect to any devices ", Toast.LENGTH_SHORT).show();
             }
         }
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -540,7 +540,7 @@ public class HomeFragment extends Fragment {
 
 
     private void getResponseWeatherApi(double lat, double lon, String units, String apiKey, View v) {
-        Toast.makeText(requireActivity(), "entry", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(requireActivity(), "entry", Toast.LENGTH_SHORT).show();
 
 
         RetrofitClient.getOpenWeatherApi().getCurrentWeatherForecast(String.valueOf(lat), String.valueOf(lon), units, apiKey).enqueue(new Callback<CurrentWeatherForecastResponse>() {

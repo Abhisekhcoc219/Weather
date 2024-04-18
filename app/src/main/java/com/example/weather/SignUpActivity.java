@@ -37,6 +37,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.SignInMethodQueryResult;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -104,7 +105,7 @@ public class SignUpActivity extends AppCompatActivity {
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    AuthenticationWithCreaditonal(name, email, password);
+                                    AuthenticationWithCreaditonal(name.trim(), email, password);
                                     loading.setVisibility(View.GONE);
                                 }
                             }, 2000);
@@ -188,6 +189,23 @@ public class SignUpActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
+
+                                            FirebaseUser user = mAuth.getCurrentUser();
+
+                                            // Set the display name
+                                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                    .setDisplayName(userName)
+                                                    // You can also set other properties here if needed, like photo URL
+                                                    .build();
+                                            user.updateProfile(profileUpdates)
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+//                                                                Log.d(TAG, "User profile updated.");
+                                                            }
+                                                        }
+                                                    });
                                             Intent i = new Intent(getApplicationContext(), EmailVerificationActivity.class);
                                             i.putExtra("name", userName);
                                             i.putExtra("email", userEmail);
