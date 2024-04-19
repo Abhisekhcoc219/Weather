@@ -3,15 +3,22 @@ package com.example.weather;
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,11 +68,33 @@ public class SettingsFragment extends Fragment {
         Logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-                if(user==null){
-                 startActivity(new Intent(requireActivity(), SignInActivity.class));
-                }
+                AlertDialog alertDialog;
+                AlertDialog.Builder builder=new AlertDialog.Builder(requireActivity());
+                final View view=LayoutInflater.from(requireActivity()).inflate(R.layout.logout_alertdialog,null);
+                builder.setView(view);
+                AppCompatButton Yes=view.findViewById(R.id.yes);
+                AppCompatButton No=view.findViewById(R.id.no);
+                alertDialog=builder.create();
+                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                Yes.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        FirebaseAuth.getInstance().signOut();
+                        FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                        if(user==null){
+                            startActivity(new Intent(requireActivity(), SignInActivity.class));
+                            alertDialog.dismiss();
+                        }
+                    }
+                });
+                No.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
+                alertDialog.show();
+                alertDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
             }
         });
         return v;
@@ -99,12 +128,7 @@ public class SettingsFragment extends Fragment {
                         Toast.makeText(requireContext(), "not exist", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(requireActivity(), ""+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            }).addOnFailureListener(e -> Toast.makeText(requireActivity(), ""+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 }
