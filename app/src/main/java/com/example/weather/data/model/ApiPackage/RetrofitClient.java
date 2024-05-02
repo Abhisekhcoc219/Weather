@@ -18,6 +18,8 @@ public class RetrofitClient {
     private static Retrofit openWeatherretrofit;
     private static Retrofit openMeteoRetrofit;
     private static Retrofit geocodingRetrofit;
+
+    //current day forecasting
     private static Retrofit getOpenWeatherApiRetrofitInstance() {
         if (openWeatherretrofit == null) {
             openWeatherretrofit = new retrofit2.Retrofit.Builder()
@@ -45,6 +47,8 @@ public class RetrofitClient {
                 .addInterceptor(getHttpLoggingInterceptor())
                 .build();
   }
+
+  //this for 24 hour and 7 day forecast
     private static Retrofit getOpenMeteoApiRetrofitInstance() {
         if (openMeteoRetrofit == null) {
             openMeteoRetrofit = new retrofit2.Retrofit.Builder()
@@ -65,6 +69,8 @@ public class RetrofitClient {
     public static String getOpenWeatherApiKey() {
         return openWeatherApiKey;
     }
+
+    //this for geocoding convert city name into latitude and longitude
     private static Retrofit getGeoLocationInstance(){
       if(geocodingRetrofit==null){
           geocodingRetrofit=new retrofit2.Retrofit.Builder()

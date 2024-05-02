@@ -57,15 +57,12 @@ public class EmailVerificationActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
                     if(mUser.isEmailVerified()){
-                        Toast.makeText(EmailVerificationActivity.this, "success", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EmailVerificationActivity.this, "verify", Toast.LENGTH_SHORT).show();
                         StoreInDb();
-                    }
-                    else{
-                        Toast.makeText(EmailVerificationActivity.this, "failed", Toast.LENGTH_SHORT).show();
                     }
                 }
                 else{
-                    Toast.makeText(EmailVerificationActivity.this, "is failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EmailVerificationActivity.this, "please verify your email", Toast.LENGTH_SHORT).show();
                 }
                 }
             });

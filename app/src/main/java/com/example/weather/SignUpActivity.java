@@ -222,6 +222,7 @@ public class SignUpActivity extends AppCompatActivity {
                             }
                         } else {
                             // If sign in fails, display a message to the user.
+                            Toast.makeText(SignUpActivity.this, "account is exist already please login", Toast.LENGTH_LONG).show();
                         }
                     }
                 }).addOnFailureListener(this, new OnFailureListener() {
